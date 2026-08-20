@@ -1,0 +1,68 @@
+import Image from "next/image";
+import Link from "next/link";
+import React from "react";
+
+const Categories = () => {
+  return (
+    <section className="max-w-7xl mx-auto px-5 lg:px-0 grid grid-cols-1 md:grid-cols-2 gap-11 md:gap-2.5 py-12 md:py-18 justify-items-center lg:justify-items-stretch">
+      <Link
+        href="/shop"
+        className="relative px-4 py-5 flex items-end w-full h-96.5 md:w-75 lg:w-140 overflow-hidden"
+      >
+        <img
+          src="/images/cat-1.avif"
+          alt="Serums Category"
+          className="absolute top-0 left-0 w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+        />
+        <div className="flex flex-col md:gap-4 gap-2 text-white z-10">
+          <h2 className="text-2xl md:text-3xl">SERUMS</h2>
+          <p className="underline text-base md:text-xl">SHOP NOW</p>
+        </div>
+      </Link>
+      <Link
+        href="/shop"
+        className="relative px-4 py-5 flex items-end w-full h-96.5 md:w-75 lg:w-140 overflow-hidden"
+      >
+        <img
+          src="/images/cat-2.jpg"
+          alt="Lip Kits Category"
+          className="absolute top-0 left-0 w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+        />
+        <div className="flex flex-col md:gap-4 gap-2 text-white z-10">
+          <h2 className="text-2xl md:text-3xl">LIP KITS</h2>
+          <p className="underline text-base md:text-xl">SHOP NOW</p>
+        </div>
+      </Link>
+      <Link
+        href="/shop"
+        className="relative px-4 py-5 flex items-end w-full h-96.5 md:w-75 lg:w-140 overflow-hidden"
+      >
+        <img
+          src="/images/cat-3.avif"
+          alt="Tops Category"
+          className="absolute top-0 left-0 w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+        />
+        <div className="flex flex-col md:gap-4 gap-2 text-white z-10">
+          <h2 className="text-2xl md:text-3xl">TOPS</h2>
+          <p className="underline text-base md:text-xl">SHOP NOW</p>
+        </div>
+      </Link>
+      <Link
+        href="/shop"
+        className="relative px-4 py-5 flex items-end w-full h-96.5 md:w-75 lg:w-140 overflow-hidden"
+      >
+        <img
+          src="/images/cat-4.avif"
+          alt="Blushes Category"
+          className="absolute top-0 left-0 w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+        />
+        <div className="flex flex-col gap-2 md:gap-4 text-white z-10">
+          <h2 className="text-2xl md:text-3xl">BLUSHES</h2>
+          <p className="underline text-base md:text-xl">SHOP NOW</p>
+        </div>
+      </Link>
+    </section>
+  );
+};
+
+export default Categories;
