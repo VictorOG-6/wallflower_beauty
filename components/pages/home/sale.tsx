@@ -1,26 +1,35 @@
+"use client";
+
+import ProductCard from "@/components/shared/product-card";
+import useFetchProducts from "@/hooks/product/use-fetch-products";
+import { useProductSlider } from "@/hooks/use-product-slider";
+import { Product } from "@/types";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import React from "react";
+import React, { useMemo, useState } from "react";
 
 const ARROW_CLASS =
   "cursor-pointer text-primary transition-colors disabled:cursor-not-allowed disabled:text-[#D9D9D9]";
 
+const SLIDE_CLASS =
+  "flex-none w-[calc((100%-1.5rem)/2)] md:w-[calc((100%-7.5rem)/4)] snap-start";
+
 const Sale = () => {
-  //     const [page, setPage] = useState<number>(1);
-  //   const pageSize = 8;
+  const [page, setPage] = useState<number>(1);
+  const pageSize = 8;
 
-  //   const { data: productResponse, isLoading } = useFetchProducts({
-  //     page_size: pageSize,
-  //     page,
-  //     status: "published",
-  //   });
+  const { data: productResponse, isLoading } = useFetchProducts({
+    page_size: pageSize,
+    page,
+    status: "published",
+  });
 
-  //   const products = useMemo<Product[]>(() => {
-  //     if (Array.isArray(productResponse)) return productResponse;
-  //     return productResponse?.data ?? productResponse?.items ?? [];
-  //   }, [productResponse]);
+  const products = useMemo<Product[]>(() => {
+    if (Array.isArray(productResponse)) return productResponse;
+    return productResponse?.data ?? productResponse?.items ?? [];
+  }, [productResponse]);
 
-  //   const { scrollRef, canScrollLeft, canScrollRight, scrollProducts } =
-  //     useProductSlider(products.length);
+  const { scrollRef, canScrollLeft, canScrollRight, scrollProducts } =
+    useProductSlider(products.length);
   return (
     <section className="px-5 lg:px-0 py-12 md:py-18">
       <div className="max-w-7xl mx-auto px-5 lg:pl-10 bg-foreground pt-6 pb-10 md:pt-10 md:pb-5 my-7 md:my-9 flex flex-col gap-17">
@@ -36,8 +45,8 @@ const Sale = () => {
           <div className="hidden lg:flex items-center gap-2.5">
             <button
               type="button"
-              // onClick={() => scrollProducts(-1)}
-              // disabled={!canScrollLeft}
+              onClick={() => scrollProducts(-1)}
+              disabled={!canScrollLeft}
               aria-label="View previous products"
               className={ARROW_CLASS}
             >
@@ -46,8 +55,8 @@ const Sale = () => {
             <div className="w-0.5 h-4 bg-[#D9D9D9]" />
             <button
               type="button"
-              // onClick={() => scrollProducts(1)}
-              // disabled={!canScrollRight}
+              onClick={() => scrollProducts(1)}
+              disabled={!canScrollRight}
               aria-label="View next products"
               className={ARROW_CLASS}
             >
@@ -56,35 +65,37 @@ const Sale = () => {
           </div>
         </div>
         <div>
-          {/* {isLoading ? (
+          {isLoading ? (
             <div className="flex gap-6 md:gap-10 pl-7 overflow-hidden">
-                {Array.from({ length: pageSize }).map((_, index) => (
+              {Array.from({ length: pageSize }).map((_, index) => (
                 <div key={index} className={SLIDE_CLASS}>
-                    <div className="flex flex-col items-center gap-5 animate-pulse">
+                  <div className="flex flex-col items-center gap-5 animate-pulse">
                     <div className="w-37.5 h-50 md:w-60 md:h-80 bg-foreground rounded-2xl" />
                     <div className="h-4 w-28 bg-foreground rounded" />
                     <div className="h-4 w-20 bg-foreground rounded" />
-                    </div>
+                  </div>
                 </div>
-                ))}
+              ))}
             </div>
-            ) : products.length === 0 ? (
+          ) : products.length === 0 ? (
             <div className="w-full rounded-2xl bg-foreground px-5 py-16 text-center text-secondary">
-                No products found.
+              No products found.
             </div>
-            ) : (
-            <div
+          ) : (
+            <div className="pl-7">
+              <div
                 ref={scrollRef}
-                className="flex gap-6 md:gap-10 pl-7 overflow-x-auto snap-x snap-mandatory pb-4 [&::-webkit-scrollbar]:hidden"
+                className="flex gap-6 md:gap-10 overflow-x-auto snap-x snap-mandatory pb-4 [&::-webkit-scrollbar]:hidden"
                 style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-            >
+              >
                 {products.map((product) => (
-                <div key={product.id} className={SLIDE_CLASS}>
+                  <div key={product.id} className={SLIDE_CLASS}>
                     <ProductCard product={product} />
-                </div>
+                  </div>
                 ))}
+              </div>
             </div>
-            )} */}
+          )}
         </div>
       </div>
     </section>

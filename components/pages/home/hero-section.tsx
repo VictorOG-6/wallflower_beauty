@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const HeroSection = () => {
   return (
     <section
@@ -23,12 +25,18 @@ const HeroSection = () => {
           </p>
         </div>
         <div className="flex items-center gap-5 md:gap-8">
-          <button className="w-43 md:w-61 h-15 md:h-18 bg-white text-black flex items-center justify-center text-base md:text-xl cursor-pointer transition-all duration-300 hover:bg-muted">
+          <Link
+            href="/shop"
+            className="w-43 md:w-61 h-15 md:h-18 bg-white text-black flex items-center justify-center text-base md:text-xl cursor-pointer transition-all duration-300 hover:bg-muted"
+          >
             SHOP COLLECTION
-          </button>
-          <button className="w-43 md:w-45 h-15 md:h-18 bg-transparent text-white border border-white flex items-center justify-center text-base md:text-xl cursor-pointer transition-all duration-300 hover:bg-white/40">
+          </Link>
+          <Link
+            href="/shade-finder"
+            className="w-43 md:w-45 h-15 md:h-18 bg-transparent text-white border border-white flex items-center justify-center text-base md:text-xl cursor-pointer transition-all duration-300 hover:bg-white/40"
+          >
             FIND MY SHADE
-          </button>
+          </Link>
         </div>
       </div>
     </section>

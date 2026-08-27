@@ -213,7 +213,7 @@ export function PolicyHero({
         style={{ background: "var(--gradient-primary)" }}
       />
       <div
-        className="pointer-events-none absolute -top-32 -right-32 h-[420px] w-[420px] rounded-full opacity-[0.12] blur-[80px]"
+        className="pointer-events-none absolute -top-32 -right-32 h-105 w-105 rounded-full opacity-[0.12] blur-[80px]"
         style={{ background: "var(--gradient-blur)" }}
       />
       <div className="fluid-width max-w-8xl relative mx-auto px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
@@ -229,7 +229,7 @@ export function PolicyHero({
         <p className="text-[#8E8E93] mb-4 text-[0.75rem] font-semibold tracking-[0.12em] uppercase">
           {updated}
         </p>
-        <p className="text-secondary max-w-[520px] text-[1.02rem] leading-[1.74]">
+        <p className="text-secondary max-w-130 text-[1.02rem] leading-[1.74]">
           {description}
         </p>
       </div>

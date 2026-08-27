@@ -1,10 +1,52 @@
+"use client";
+
+import { useProductSlider } from "@/hooks/use-product-slider";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import React from "react";
 
 const ARROW_CLASS =
   "cursor-pointer text-primary transition-colors disabled:cursor-not-allowed disabled:text-[#D9D9D9]";
 
+const SLIDE_CLASS = "h-full shrink-0 snap-start flex";
+
+const CREATORS = [
+  {
+    handle: "@libra_aff",
+    image: "/images/influencer-1.jpg",
+    imageClass: "w-75 h-75 md:w-100 md:h-100",
+    alignClass: "items-start",
+  },
+  {
+    handle: "@fave_szn",
+    image: "/images/influencer-2.jpg",
+    imageClass: "w-75 h-75 md:w-80 md:h-100",
+    alignClass: "items-start md:items-end",
+  },
+  {
+    handle: "@bbaahhttt",
+    image: "/images/influencer-3.jpg",
+    imageClass: "w-75 h-75 md:w-80 md:h-100",
+    alignClass: "items-start",
+  },
+] as const;
+
+const textShadowStyle = {
+  textShadow: `
+    2px 0 black,
+    -2px 0 black,
+    0 2px black,
+    0 -2px black,
+    1.5px 1.5px black,
+    -1.5px -1.5px black,
+    1.5px -1.5px black,
+    -1.5px 1.5px black
+  `,
+} as const;
+
 const Creators = () => {
+  const { scrollRef, canScrollLeft, canScrollRight, scrollProducts } =
+    useProductSlider(CREATORS.length);
+
   return (
     <section className="max-w-7xl mx-auto px-5 lg:px-0 py-12 md:py-18 flex flex-col items-center lg:items-start gap-12 md:gap-15">
       <div className="w-full flex flex-col lg:flex-row items-center justify-between">
@@ -19,9 +61,9 @@ const Creators = () => {
         <div className="hidden lg:flex items-center gap-2.5">
           <button
             type="button"
-            // onClick={() => scrollProducts(-1)}
-            // disabled={!canScrollLeft}
-            aria-label="View previous products"
+            onClick={() => scrollProducts(-1)}
+            disabled={!canScrollLeft}
+            aria-label="View previous creators"
             className={ARROW_CLASS}
           >
             <ChevronLeft className="size-5 md:size-10" />
@@ -29,94 +71,42 @@ const Creators = () => {
           <div className="w-0.5 h-4 bg-[#D9D9D9]" />
           <button
             type="button"
-            // onClick={() => scrollProducts(1)}
-            // disabled={!canScrollRight}
-            aria-label="View next products"
+            onClick={() => scrollProducts(1)}
+            disabled={!canScrollRight}
+            aria-label="View next creators"
             className={ARROW_CLASS}
           >
             <ChevronRight className="size-5 md:size-10" />
           </button>
         </div>
       </div>
-      <div className="md:h-135 w-full flex items-center justify-between gap-5 lg:gap-14.5 overflow-x-auto lg:overflow-hidden">
-        <div className="h-full flex items-start">
-          <div className="relative w-75 h-75 md:w-100 md:h-100 flex items-end py-4 px-5">
-            <img
-              src="/images/influencer-1.jpg"
-              alt="Libra_aff"
-              className="absolute top-0 left-0 w-full h-full object-cover"
-            />
-            <span
-              className="text-2xl text-white text-shadow-md z-10"
-              style={{
-                textShadow: `
-                2px 0 black,
-                -2px 0 black,
-                0 2px black,
-                0 -2px black,
-                1.5px 1.5px black,
-                -1.5px -1.5px black,
-                1.5px -1.5px black,
-                -1.5px 1.5px black
-              `,
-              }}
+      <div
+        ref={scrollRef}
+        className="md:h-135 w-full flex items-center gap-5 lg:gap-14.5 overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
+        {CREATORS.map((creator) => (
+          <div
+            key={creator.handle}
+            className={`${SLIDE_CLASS} ${creator.alignClass}`}
+          >
+            <div
+              className={`relative ${creator.imageClass} flex items-end py-4 px-5`}
             >
-              @libra_aff
-            </span>
+              <img
+                src={creator.image}
+                alt={creator.handle}
+                className="absolute top-0 left-0 w-full h-full object-cover"
+              />
+              <span
+                className="text-2xl text-white text-shadow-md z-10"
+                style={textShadowStyle}
+              >
+                {creator.handle}
+              </span>
+            </div>
           </div>
-        </div>
-        <div className="h-full flex items-start md:items-end">
-          <div className="relative w-75 h-75 md:w-80 md:h-100 flex items-end py-4 px-5">
-            <img
-              src="/images/influencer-2.jpg"
-              alt="Fave_szn"
-              className="absolute top-0 left-0 w-full h-full object-cover"
-            />
-            <span
-              className="text-2xl text-white text-shadow-md z-10"
-              style={{
-                textShadow: `
-                2px 0 black,
-                -2px 0 black,
-                0 2px black,
-                0 -2px black,
-                1.5px 1.5px black,
-                -1.5px -1.5px black,
-                1.5px -1.5px black,
-                -1.5px 1.5px black
-              `,
-              }}
-            >
-              @fave_szn
-            </span>
-          </div>
-        </div>
-        <div className="h-full flex items-start">
-          <div className="relative w-75 h-75 md:w-80 md:h-100 flex items-end py-4 px-5">
-            <img
-              src="/images/influencer-3.jpg"
-              alt="Bbaahhttt"
-              className="absolute top-0 left-0 w-full h-full object-cover"
-            />
-            <span
-              className="text-2xl text-white text-shadow-md z-10"
-              style={{
-                textShadow: `
-                2px 0 black,
-                -2px 0 black,
-                0 2px black,
-                0 -2px black,
-                1.5px 1.5px black,
-                -1.5px -1.5px black,
-                1.5px -1.5px black,
-                -1.5px 1.5px black
-              `,
-              }}
-            >
-              @bbaahhttt
-            </span>
-          </div>
-        </div>
+        ))}
       </div>
     </section>
   );

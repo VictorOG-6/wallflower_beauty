@@ -1,3 +1,5 @@
+"use client";
+
 import CTA from "@/components/pages/home/cta";
 import Categories from "@/components/pages/home/categories";
 import HeroSection from "@/components/pages/home/hero-section";

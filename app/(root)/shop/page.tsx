@@ -1,9 +1,9 @@
 "use client";
 
-// import ProductCard from "@/components/shared/product-card";
-// import useFetchProducts from "@/hooks/product/use-fetch-products";
-// import useFetchProductCategoriesSummary from "@/hooks/product/use-fetch-product-categories-summary";
-// import { Product, ProductCategoriesSummary } from "@/types";
+import ProductCard from "@/components/shared/product-card";
+import useFetchProducts from "@/hooks/product/use-fetch-products";
+import useFetchProductCategoriesSummary from "@/hooks/product/use-fetch-product-categories-summary";
+import { Product, ProductCategoriesSummary } from "@/types";
 import { ArrowLeft, ArrowRight, Search } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { Suspense, useEffect, useMemo, useState } from "react";
@@ -37,38 +37,38 @@ const ShopContent = () => {
     });
   };
 
-  //   const { data: categories = [] } = useFetchProductCategoriesSummary({
-  //     status: "published",
-  //   });
-  //   const {
-  //     data: productResponse,
-  //     isLoading,
-  //     isFetching,
-  //   } = useFetchProducts({
-  //     page_size: pageSize,
-  //     page,
-  //     name: search,
-  //     category: activeCategory === "All" ? undefined : activeCategory,
-  //     status: "published",
-  //   });
+  const { data: categories = [] } = useFetchProductCategoriesSummary({
+    status: "published",
+  });
+  const {
+    data: productResponse,
+    isLoading,
+    isFetching,
+  } = useFetchProducts({
+    page_size: pageSize,
+    page,
+    name: search,
+    category: activeCategory === "All" ? undefined : activeCategory,
+    status: "published",
+  });
 
-  //   const products = useMemo<Product[]>(() => {
-  //     if (Array.isArray(productResponse)) return productResponse;
-  //     return productResponse?.data ?? productResponse?.items ?? [];
-  //   }, [productResponse]);
+  const products = useMemo<Product[]>(() => {
+    if (Array.isArray(productResponse)) return productResponse;
+    return productResponse?.data ?? productResponse?.items ?? [];
+  }, [productResponse]);
 
-  //   const categoryOptions = useMemo(
-  //     () => [
-  //       "All",
-  //       ...categories.map(
-  //         (category: ProductCategoriesSummary) => category.category,
-  //       ),
-  //     ],
-  //     [categories],
-  //   );
+  const categoryOptions = useMemo(
+    () => [
+      "All",
+      ...categories.map(
+        (category: ProductCategoriesSummary) => category.category,
+      ),
+    ],
+    [categories],
+  );
 
   const canGoBack = page > 1;
-  //   const canGoForward = products.length === pageSize;
+  const canGoForward = products.length === pageSize;
 
   return (
     <main className="pt-20 md:pt-28">
@@ -90,15 +90,15 @@ const ShopContent = () => {
       <section className="max-w-7xl mx-auto flex flex-col gap-10 md:gap-20 px-5 py-8 md:py-10 md:px-0">
         <div className="flex flex-col-reverse lg:flex-row items-center lg:justify-between gap-8 md:gap-0">
           <div className="grid grid-cols-3 lg:grid-cols-5 gap-5">
-            {/* {categoryOptions.map((category: string) => (
+            {categoryOptions.map((category: string) => (
               <div
                 key={category}
-                className={`flex items-center font-roboto-mono justify-center py-1 px-2 md:px-3.5 cursor-pointer rounded-2xl text-secondary transition-all duration-300 hover:bg-primary hover:text-white ${activeCategory === category ? "bg-primary text-white" : "text-secondary bg-foreground"}`}
+                className={`flex items-center font-roboto-mono justify-center py-1 px-2 md:px-3.5 cursor-pointer text-secondary transition-all duration-300 hover:bg-primary hover:text-white ${activeCategory === category ? "bg-primary text-white" : "text-secondary bg-white border border-primary/20"}`}
                 onClick={() => updateCategory(category)}
               >
                 <p className="text-sm md:text-base">{category}</p>
               </div>
-            ))} */}
+            ))}
           </div>
           <div className="w-full bg-white md:w-91.5 flex items-center gap-3 py-1.5 md:py-3 px-4 border border-[#F0F0F0] rounded-2xl text-secondary">
             <Search size={24} />
@@ -114,7 +114,7 @@ const ShopContent = () => {
             />
           </div>
         </div>
-        {/* {isLoading ? (
+        {isLoading ? (
           <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-7">
             {Array.from({ length: pageSize }).map((_, index) => (
               <div
@@ -137,12 +137,12 @@ const ShopContent = () => {
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
-        )} */}
+        )}
         <div className="w-full flex items-center justify-center">
           <div className="flex items-center gap-2">
             <button
               type="button"
-              //   disabled={!canGoBack || isFetching}
+              disabled={!canGoBack || isFetching}
               onClick={() =>
                 setPage((currentPage) => Math.max(1, currentPage - 1))
               }
@@ -157,9 +157,9 @@ const ShopContent = () => {
             </div>
             <button
               type="button"
-              //   disabled={!canGoForward || isFetching}
+              disabled={!canGoForward || isFetching}
               onClick={() => setPage((currentPage) => currentPage + 1)}
-              //   className={`w-11 h-11 flex items-center justify-center rounded-full bg-[#F3F3F3] ${canGoForward ? "text-primary cursor-pointer" : "text-[#C4C4C4]"}`}
+              className={`w-11 h-11 flex items-center justify-center rounded-full bg-[#F3F3F3] ${canGoForward ? "text-primary cursor-pointer" : "text-[#C4C4C4]"}`}
             >
               <ArrowRight size={16} />
             </button>

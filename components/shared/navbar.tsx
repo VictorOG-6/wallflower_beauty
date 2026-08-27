@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  Search,
   ShoppingBasket,
   X,
 } from "lucide-react";
@@ -12,15 +13,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";
-// import UserAvatar from "./user-avatar";
+import UserAvatar from "./user-avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-// import CartItems from "./cart-items";
-// import { useCart } from "@/contexts/cart/cart-context";
-// import { formatToNaira } from "@/lib/utils";
-// import { useUserContext } from "@/contexts/user/user-context";
-// import { useLogout } from "@/hooks/auth/useLogout";
-// import ProfilePictureModal from "./profile-picture-modal";
-// import type { UserRole } from "@/types";
+import CartItems from "./cart-items";
+import { useCart } from "@/contexts/cart/cart-context";
+import { formatToNaira } from "@/lib/utils";
+import { useUserContext } from "@/contexts/user/user-context";
+import ProfilePictureModal from "./profile-picture-modal";
+import type { UserRole } from "@/types";
+import { useLogout } from "@/hooks/auth/use-logout";
 
 const navLinks = [
   { name: "Shop", href: "/shop" },
@@ -29,13 +30,13 @@ const navLinks = [
   { name: "Shade Finder", href: "/shade-finder" },
 ];
 
-// const ADMIN_ROLES = new Set<UserRole>(["admin", "staff"]);
+const ADMIN_ROLES = new Set<UserRole>(["admin", "staff"]);
 
 const Navbar = () => {
   const pathname = usePathname();
-  //   const { user } = useUserContext();
-  //   const { totalItems, totalPrice } = useCart();
-  //   const { logout, isLoading } = useLogout();
+  const { user } = useUserContext();
+  const { totalItems, totalPrice } = useCart();
+  const { logout, isLoading } = useLogout();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isProfilePictureModalOpen, setIsProfilePictureModalOpen] =
     useState<boolean>(false);
@@ -46,7 +47,7 @@ const Navbar = () => {
   const isHomepage = pathname === "/";
   const navColorClass =
     isHomepage && !scrolledUp ? "text-black text-white" : "text-black";
-  //   const canAccessAdmin = user ? ADMIN_ROLES.has(user.role) : false;
+  const canAccessAdmin = user ? ADMIN_ROLES.has(user.role) : false;
 
   const handleProfilePictureModalClose = () => {
     setIsProfilePictureModalOpen(false);
@@ -122,11 +123,7 @@ const Navbar = () => {
         </nav>
 
         <div className={`flex items-center gap-5 md:gap-8 ${navColorClass}`}>
-          {/* <Search
-            size={24}
-            className="cursor-pointer transition-colors duration-300 hover:text-primary"
-          /> */}
-          {/* {canAccessAdmin && (
+          {canAccessAdmin && (
             <Link
               href="/admin"
               aria-label="Open admin dashboard"
@@ -134,9 +131,9 @@ const Navbar = () => {
                 pathname.startsWith("/admin") ? "text-primary" : "text-black"
               }`}
             >
-              <span className="hidden xl:inline">Admin</span>
+              <span className={`hidden xl:inline ${navColorClass}`}>Admin</span>
             </Link>
-          )} */}
+          )}
 
           <Popover>
             <PopoverTrigger className="relative">
@@ -144,35 +141,35 @@ const Navbar = () => {
                 size={24}
                 className={`cursor-pointer transition-colors duration-300 hover:text-primary ${navColorClass}`}
               />
-              {/* {totalItems > 0 && (
+              {totalItems > 0 && (
                 <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-white">
                   {totalItems}
                 </span>
-              )} */}
+              )}
             </PopoverTrigger>
             <PopoverContent align="end" className="w-86 p-4">
               <div className="flex flex-col gap-5">
                 <div className="flex items-center justify-between">
                   <h2 className="font-roboto-mono text-sm font-medium text-primary">
-                    Anniqcleo Cart
+                    Wallflower Beauty Cart
                   </h2>
                   <span className="text-xs text-secondary">
-                    {/* {totalItems} item{totalItems === 1 ? "" : "s"} */}
+                    {totalItems} item{totalItems === 1 ? "" : "s"}
                   </span>
                 </div>
 
                 <div className="max-h-86 overflow-y-auto pr-1">
-                  {/* <CartItems compact maxItems={3} /> */}
+                  <CartItems compact maxItems={3} />
                 </div>
 
                 <div className="flex items-center justify-between border-t border-[#E5E5E5] pt-3 text-sm">
                   <span className="text-secondary">Subtotal</span>
                   <span className="font-semibold text-primary">
-                    {/* {formatToNaira(totalPrice)} */}
+                    {formatToNaira(totalPrice)}
                   </span>
                 </div>
 
-                {/* {user ? (
+                {user ? (
                   <Link
                     href="/cart"
                     className="w-full flex items-center justify-center rounded-2xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary/80"
@@ -186,12 +183,12 @@ const Navbar = () => {
                   >
                     Sign in
                   </Link>
-                )} */}
+                )}
               </div>
             </PopoverContent>
           </Popover>
 
-          {/* {user ? (
+          {user ? (
             <Popover>
               <PopoverTrigger className="hidden lg:block">
                 <UserAvatar
@@ -255,7 +252,7 @@ const Navbar = () => {
                 Sign in
               </button>
             </Link>
-          )} */}
+          )}
 
           <button
             onClick={() => setIsOpen(!isOpen)}
@@ -276,7 +273,7 @@ const Navbar = () => {
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {/* {user && (
+        {user && (
           <div className="flex flex-col items-center gap-1">
             <div className="relative">
               <UserAvatar
@@ -297,10 +294,10 @@ const Navbar = () => {
             </h2>
             <p className="text-xs text-gray-500">{user.email}</p>
           </div>
-        )} */}
+        )}
 
         <nav className="w-full flex flex-col">
-          {/* {canAccessAdmin && (
+          {canAccessAdmin && (
             <Link
               href="/admin"
               onClick={() => setIsOpen(false)}
@@ -310,7 +307,7 @@ const Navbar = () => {
             >
               Admin
             </Link>
-          )} */}
+          )}
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -325,14 +322,14 @@ const Navbar = () => {
           ))}
         </nav>
 
-        {/* <button
+        <button
           className={`${
             user ? "bg-red-500" : "bg-primary"
           } rounded-md shadow-md text-white text-sm flex items-center justify-center py-1.5 px-4`}
           onClick={() => logout()}
         >
           {user ? "Sign out" : isLoading ? "Signing out..." : "Sign in"}
-        </button> */}
+        </button>
       </aside>
 
       {/* Overlay: starts below navbar so the header row stays fully interactive */}
@@ -343,10 +340,10 @@ const Navbar = () => {
         />
       )}
 
-      {/* <ProfilePictureModal
+      <ProfilePictureModal
         isOpen={isProfilePictureModalOpen}
         onClose={handleProfilePictureModalClose}
-      /> */}
+      />
     </header>
   );
 };

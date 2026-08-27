@@ -34,7 +34,7 @@ const Customers = () => {
           </div>
         </div>
       </div>
-      <div className="flex flex-col lg:flex-row items-center lg:justify-between gap-12.5 lg:gap-7">
+      <div className="flex flex-col lg:flex-wrap lg:flex-row items-center lg:justify-between gap-12.5 lg:gap-7">
         <img
           src="/images/customer-1.webp"
           alt="Customer"

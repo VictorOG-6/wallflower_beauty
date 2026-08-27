@@ -7,7 +7,7 @@ const Categories = () => {
     <section className="max-w-7xl mx-auto px-5 lg:px-0 grid grid-cols-1 md:grid-cols-2 gap-11 md:gap-2.5 py-12 md:py-18 justify-items-center lg:justify-items-stretch">
       <Link
         href="/shop"
-        className="relative px-4 py-5 flex items-end w-full h-96.5 md:w-75 lg:w-140 overflow-hidden"
+        className="relative px-4 py-5 flex items-end w-full h-96.5 overflow-hidden"
       >
         <img
           src="/images/cat-1.avif"
@@ -21,7 +21,8 @@ const Categories = () => {
       </Link>
       <Link
         href="/shop"
-        className="relative px-4 py-5 flex items-end w-full h-96.5 md:w-75 lg:w-140 overflow-hidden"
+        // lg:w-140 md:w-75
+        className="relative px-4 py-5 flex items-end w-full h-96.5 overflow-hidden"
       >
         <img
           src="/images/cat-2.jpg"
@@ -35,7 +36,7 @@ const Categories = () => {
       </Link>
       <Link
         href="/shop"
-        className="relative px-4 py-5 flex items-end w-full h-96.5 md:w-75 lg:w-140 overflow-hidden"
+        className="relative px-4 py-5 flex items-end w-full h-96.5 overflow-hidden"
       >
         <img
           src="/images/cat-3.avif"
@@ -49,7 +50,7 @@ const Categories = () => {
       </Link>
       <Link
         href="/shop"
-        className="relative px-4 py-5 flex items-end w-full h-96.5 md:w-75 lg:w-140 overflow-hidden"
+        className="relative px-4 py-5 flex items-end w-full h-96.5 overflow-hidden"
       >
         <img
           src="/images/cat-4.avif"

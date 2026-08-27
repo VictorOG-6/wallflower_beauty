@@ -15,7 +15,7 @@ const Exclusive = () => {
           alt="Wallflower Top Collection"
           className="block lg:hidden absolute top-0 left-0 w-full h-full md:h-auto object-cover"
         />
-        <div className="z-10 bg-white flex flex-col items-center gap-2.5 text-center px-8.5 md:px-6 pt-4 md:pt-6 pb-3">
+        <div className="z-10 bg-white flex flex-col items-center gap-2.5 text-center px-8.5 md:px-6 pt-4 md:pt-6 pb-3 lg:mr-45">
           <h1 className="underline text-primary text-base md:text-xl font-roboto-mono font-medium">
             WALLFLOWER TANK TOP
           </h1>
