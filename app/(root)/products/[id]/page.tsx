@@ -7,7 +7,7 @@ import { formatToNaira } from "@/lib/utils";
 import { ArrowLeft, Minus, Plus, ShoppingBasket } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 export default function ProductDetailPage() {
@@ -19,17 +19,61 @@ export default function ProductDetailPage() {
   const [selectedVariantId, setSelectedVariantId] = useState<
     string | undefined
   >(undefined);
+  const [selectedSubVariantId, setSelectedSubVariantId] = useState<
+    string | undefined
+  >(undefined);
   const selectedVariant =
     variants.find((variant) => variant.id === selectedVariantId) ?? variants[0];
+  const subVariants = selectedVariant?.sub_variants ?? [];
+  const selectedSubVariant = subVariants.find(
+    (subVariant) => subVariant.id === selectedSubVariantId,
+  );
+  const hasSubVariants = subVariants.length > 0;
+  const availableQuantity = hasSubVariants
+    ? (selectedSubVariant?.quantity ?? 0)
+    : (selectedVariant?.quantity ?? product?.quantity ?? 0);
   const displayedImage =
     selectedVariant?.image_url ||
     product?.image_url ||
     "/images/featured1.avif";
 
+  useEffect(() => {
+    setSelectedSubVariantId(undefined);
+    setQuantity(1);
+  }, [selectedVariantId]);
+
+  useEffect(() => {
+    if (!hasSubVariants) return;
+
+    setQuantity((currentQuantity) =>
+      Math.min(currentQuantity, Math.max(1, availableQuantity)),
+    );
+  }, [availableQuantity, hasSubVariants, selectedSubVariantId]);
+
   const handleAddToCart = () => {
     if (!product) return;
 
-    addItem(product, quantity, selectedVariant?.id);
+    if (hasSubVariants && !selectedSubVariant) {
+      toast.error("Please select a size");
+      return;
+    }
+
+    if (availableQuantity <= 0) {
+      toast.error("This option is out of stock");
+      return;
+    }
+
+    if (quantity > availableQuantity) {
+      toast.error(`Only ${availableQuantity} available in stock`);
+      return;
+    }
+
+    addItem(
+      product,
+      quantity,
+      selectedVariant?.id,
+      hasSubVariants ? selectedSubVariant?.id : undefined,
+    );
     toast.success("Product added to cart");
   };
 
@@ -93,8 +137,8 @@ export default function ProductDetailPage() {
             />
           </div>
 
-          <div className="flex flex-col gap-6 text-secondary">
-            <div className="flex flex-col gap-3">
+          <div className="flex flex-col items-center md:items-start gap-6 text-secondary">
+            <div className="flex flex-col items-center md:items-start gap-3">
               <p className="font-roboto-mono text-secondary capitalize">
                 {product.category}
               </p>
@@ -104,6 +148,7 @@ export default function ProductDetailPage() {
               {selectedVariant && (
                 <span className="text-sm text-secondary">
                   {selectedVariant.name}
+                  {selectedSubVariant ? ` · ${selectedSubVariant.size}` : ""}
                 </span>
               )}
               {product.average_rating !== 0 && (
@@ -124,12 +169,12 @@ export default function ProductDetailPage() {
               {formatToNaira(product.price)}
             </p>
 
-            <p className="text-sm md:text-lg leading-7">
+            <p className="text-sm md:text-lg leading-7 text-center md:text-left">
               {product.description}
             </p>
 
             {variants.length > 0 && (
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col items-center md:items-start gap-3">
                 <div className="flex items-center justify-between gap-4">
                   <h2 className="font-roboto-mono text-primary">Color</h2>
                 </div>
@@ -161,8 +206,44 @@ export default function ProductDetailPage() {
               </div>
             )}
 
-            <div className="flex flex-col sm:flex-row gap-4 sm:items-center pt-4">
-              <div className="w-fit flex items-center gap-4 border border-[#F0F0F0] rounded-2xl px-4 py-3">
+            {hasSubVariants && (
+              <div className="flex flex-col items-center md:items-start gap-3">
+                <div className="flex items-center justify-between gap-4">
+                  <h2 className="font-roboto-mono text-primary">Size</h2>
+                </div>
+                <div
+                  className="flex flex-wrap gap-2"
+                  aria-label={`Choose a ${product.name} size`}
+                >
+                  {subVariants.map((subVariant) => {
+                    const isSelected = subVariant.id === selectedSubVariantId;
+                    const isOutOfStock = subVariant.quantity <= 0;
+
+                    return (
+                      <button
+                        key={subVariant.id}
+                        type="button"
+                        disabled={isOutOfStock}
+                        onClick={() => setSelectedSubVariantId(subVariant.id)}
+                        title={subVariant.size}
+                        aria-label={`Select size ${subVariant.size}`}
+                        aria-pressed={isSelected}
+                        className={`min-w-12 rounded-xl border px-4 py-2 text-sm font-medium transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 ${
+                          isSelected
+                            ? "border-primary bg-primary text-white"
+                            : "border-[#F0F0F0] bg-white text-primary hover:border-primary/50"
+                        }`}
+                      >
+                        {subVariant.size}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-col md:flex-row gap-8 md:gap-4 items-center pt-4">
+              <div className="w-fit flex items-center gap-4 border border-[#F0F0F0] bg-white rounded-2xl px-4 py-3">
                 <button
                   type="button"
                   onClick={() =>
@@ -180,9 +261,14 @@ export default function ProductDetailPage() {
                 <button
                   type="button"
                   onClick={() =>
-                    setQuantity((currentQuantity) => currentQuantity + 1)
+                    setQuantity((currentQuantity) =>
+                      Math.min(availableQuantity || 1, currentQuantity + 1),
+                    )
                   }
-                  className="text-primary cursor-pointer"
+                  disabled={
+                    availableQuantity <= 0 || quantity >= availableQuantity
+                  }
+                  className="text-primary cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <Plus size={16} />
                 </button>
@@ -190,7 +276,11 @@ export default function ProductDetailPage() {
 
               <button
                 type="button"
-                disabled={isMutating}
+                disabled={
+                  isMutating ||
+                  availableQuantity <= 0 ||
+                  (hasSubVariants && !selectedSubVariant)
+                }
                 onClick={handleAddToCart}
                 className="bg-primary flex items-center justify-center gap-2.5 py-3 px-8 text-white font-semibold rounded-2xl shadow-md cursor-pointer transition-all duration-300 hover:bg-primary/80 disabled:opacity-60 disabled:cursor-not-allowed"
               >
@@ -213,7 +303,7 @@ export default function ProductDetailPage() {
                   className="rounded-2xl bg-foreground p-5 text-secondary"
                 >
                   <div className="mb-3">
-                    <StarRating rating={review.rating} size={14} />
+                    <StarRating rating={review.rating} />
                   </div>
                   <p className="text-sm leading-6">{review.comment}</p>
                   {review.user?.name && (

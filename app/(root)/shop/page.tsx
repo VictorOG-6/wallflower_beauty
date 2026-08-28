@@ -72,7 +72,7 @@ const ShopContent = () => {
 
   return (
     <main className="pt-20 md:pt-28">
-      <section className="py-20">
+      <section className="pt-20 pb-5 lg:py-20">
         <div className="max-w-7xl mx-auto px-5 md:px-0">
           <div className="w-full flex flex-col items-center lg:items-start text-center lg:text-left gap-3.5 lg:gap-2.5">
             <h1 className="text-primary text-base md:text-xl font-roboto-mono">
@@ -87,8 +87,8 @@ const ShopContent = () => {
           </div>
         </div>
       </section>
-      <section className="max-w-7xl mx-auto flex flex-col gap-10 md:gap-20 px-5 py-8 md:py-10 md:px-0">
-        <div className="flex flex-col-reverse lg:flex-row items-center lg:justify-between gap-8 md:gap-0">
+      <section className="max-w-7xl mx-auto flex flex-col gap-10 md:gap-20 px-5 py-8 md:py-10 lg:px-0">
+        <div className="flex flex-col-reverse lg:flex-row items-center lg:justify-between gap-8 lg:gap-0">
           <div className="grid grid-cols-3 lg:grid-cols-5 gap-5">
             {categoryOptions.map((category: string) => (
               <div
@@ -132,7 +132,7 @@ const ShopContent = () => {
             No products found.
           </div>
         ) : (
-          <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-7">
+          <div className="w-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-7">
             {products.map((product: Product) => (
               <ProductCard key={product.id} product={product} />
             ))}

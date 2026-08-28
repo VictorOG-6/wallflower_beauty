@@ -108,7 +108,7 @@ const Navbar = () => {
           />
         </Link>
 
-        <nav className="hidden md:flex items-center gap-12 font-inter">
+        <nav className="hidden lg:flex items-center gap-12 font-inter">
           {navLinks.map((link) => (
             <Link
               href={link.href}
@@ -219,7 +219,20 @@ const Navbar = () => {
                     <h2>Hi! {user.name.split(" ")[0]}</h2>
                     <p className="text-xs text-gray-500">{user.email}</p>
                   </div>
-                  <button
+                  <Link
+                    href="/profile"
+                    className="rounded-xl bg-white flex items-center justify-center px-2.5 py-1.5 mt-3 w-45 text-gray-600 duration-300 transition-all hover:bg-neutral-100 cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2 ">My Profile</div>
+                  </Link>
+                  <p
+                    onClick={() => logout()}
+                    className="flex items-center gap-2 text-xs text-red-500 cursor-pointer duration-300 transition-all hover:text-red-700 my-2"
+                  >
+                    <LogOut size={14} />
+                    {isLoading ? "Signing out..." : "Sign Out"}
+                  </p>
+                  {/* <button
                     className="rounded-xl bg-white flex items-center justify-center px-2.5 py-1.5 my-3 w-45 text-gray-600 duration-300 transition-all hover:text-red-500 cursor-pointer"
                     onClick={() => logout()}
                   >
@@ -227,18 +240,18 @@ const Navbar = () => {
                       <LogOut size={14} />
                       {isLoading ? "Signing out..." : "Sign Out"}
                     </div>
-                  </button>
+                  </button> */}
                   <div className="flex items-center gap-1.5 text-black text-[10px]">
                     <Link
                       href="/privacy-policy"
-                      className="cursor-pointer transition-all duration-300 hover:text-primary"
+                      className="cursor-pointer transition-all duration-300 hover:text-blue-700"
                     >
                       Privacy Policy
                     </Link>
                     <span className="bg-black w-0.5 h-0.5 rounded-full" />
                     <Link
                       href="/terms-and-condition"
-                      className="cursor-pointer transition-all duration-300 hover:text-primary"
+                      className="cursor-pointer transition-all duration-300 hover:text-blue-700"
                     >
                       Terms and Conditions
                     </Link>
@@ -247,7 +260,7 @@ const Navbar = () => {
               </PopoverContent>
             </Popover>
           ) : (
-            <Link href={"/sign-in"} className="hidden md:block">
+            <Link href={"/sign-in"} className="hidden lg:block">
               <button className="bg-primary cursor-pointer w-25 rounded-md shadow-md text-white text-sm md:flex items-center justify-center py-1.5 px-2 transition-all duration-300 hover:bg-primary/80">
                 Sign in
               </button>
@@ -256,7 +269,7 @@ const Navbar = () => {
 
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="block md:hidden transition-all duration-300"
+            className="block lg:hidden transition-all duration-300"
           >
             {isOpen ? (
               <X size={24} className={navColorClass} />
@@ -269,7 +282,7 @@ const Navbar = () => {
 
       {/* Sidebar: starts below navbar (top-16), slides in from the LEFT */}
       <aside
-        className={`fixed top-16 left-0 z-40 w-72 h-[calc(100vh-4rem)] bg-white flex flex-col items-center gap-6 pt-8 shadow-xl transition-transform duration-500 ease-in-out md:hidden ${
+        className={`fixed top-16 left-0 z-40 w-72 h-[calc(100vh-4rem)] bg-white flex flex-col items-center gap-6 pt-8 shadow-xl transition-transform duration-500 ease-in-out lg:hidden ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -301,9 +314,7 @@ const Navbar = () => {
             <Link
               href="/admin"
               onClick={() => setIsOpen(false)}
-              className={`flex items-center gap-2 px-6 py-3 border-b border-[#8E8E93] font-inter text-sm hover:text-primary transition-colors ${
-                pathname.startsWith("/admin") ? "text-primary" : "text-black"
-              }`}
+              className={`text-black flex items-center gap-2 px-6 py-3 border-b border-[#8E8E93] font-inter text-sm hover:text-primary transition-colors`}
             >
               Admin
             </Link>

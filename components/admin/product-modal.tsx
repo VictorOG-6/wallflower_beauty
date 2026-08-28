@@ -1,6 +1,17 @@
 "use client";
 
 import { ChangeEvent, useEffect, useState } from "react";
+import {
+  Controller,
+  FieldErrors,
+  SubmitHandler,
+  useFieldArray,
+  useForm,
+  type Control,
+  type UseFormRegister,
+  type UseFormSetValue,
+  type UseFormWatch,
+} from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,13 +29,6 @@ import { X, Upload, Loader2, Plus } from "lucide-react";
 import { useCreateProductContext } from "@/contexts/product/create-product-context";
 import { useCreateProduct } from "@/hooks/product/use-create-product";
 import { useUpdateProduct } from "@/hooks/product/use-update-product";
-import {
-  Controller,
-  FieldErrors,
-  SubmitHandler,
-  useFieldArray,
-  useForm,
-} from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -71,6 +75,17 @@ const createProductSchema = z.object({
         .number({ error: "Quantity is required" })
         .int("Quantity must be a whole number")
         .nonnegative("Quantity cannot be negative"),
+      sub_variants: z
+        .array(
+          z.object({
+            size: z.string().min(1, "Size is required"),
+            quantity: z
+              .number({ error: "Quantity is required" })
+              .int("Quantity must be a whole number")
+              .nonnegative("Quantity cannot be negative"),
+          }),
+        )
+        .optional(),
     }),
   ),
 });
@@ -78,12 +93,47 @@ const createProductSchema = z.object({
 type CreateProductFormFields = z.infer<typeof createProductSchema>;
 
 const formatVariantsForForm = (variants?: ProductVariantInput[]) =>
-  variants?.map(({ name, color, image_url, quantity }) => ({
+  variants?.map(({ name, color, image_url, quantity, sub_variants }) => ({
     name,
     color,
     image_url,
     quantity,
+    sub_variants:
+      sub_variants?.map(({ size, quantity: subQuantity }) => ({
+        size,
+        quantity: subQuantity,
+      })) ?? [],
   })) ?? [];
+
+const getVariantQuantity = (
+  variant: CreateProductFormFields["variants"][number],
+) => {
+  const subVariants = variant.sub_variants ?? [];
+  if (subVariants.length > 0) {
+    return subVariants.reduce(
+      (total, subVariant) => total + (Number(subVariant.quantity) || 0),
+      0,
+    );
+  }
+
+  return Number(variant.quantity) || 0;
+};
+
+const formatVariantsForPayload = (
+  variants: CreateProductFormFields["variants"],
+): ProductVariantInput[] =>
+  variants.map((variant) => {
+    const subVariants = variant.sub_variants?.filter(({ size }) => size.trim());
+    const hasSubVariants = (subVariants?.length ?? 0) > 0;
+
+    return {
+      name: variant.name,
+      color: variant.color,
+      image_url: variant.image_url,
+      quantity: hasSubVariants ? getVariantQuantity(variant) : variant.quantity,
+      ...(hasSubVariants ? { sub_variants: subVariants } : {}),
+    };
+  });
 
 const FieldError = ({ message }: { message?: string }) => {
   if (!message) return null;
@@ -112,6 +162,270 @@ const getImagePreviewSrc = (imageUrl: string) => {
 
   return baseUrl ? `${baseUrl}/${imagePath}` : `/${imagePath}`;
 };
+
+interface VariantFieldsProps {
+  index: number;
+  control: Control<CreateProductFormFields>;
+  register: UseFormRegister<CreateProductFormFields>;
+  setValue: UseFormSetValue<CreateProductFormFields>;
+  watch: UseFormWatch<CreateProductFormFields>;
+  errors: FieldErrors<CreateProductFormFields>;
+  onRemove: () => void;
+  onVariantImageUpload: (
+    event: ChangeEvent<HTMLInputElement>,
+    index: number,
+  ) => void;
+  isUploadingThisVariant: boolean;
+  isUploadDisabled: boolean;
+}
+
+function VariantFields({
+  index,
+  control,
+  register,
+  setValue,
+  watch,
+  errors,
+  onRemove,
+  onVariantImageUpload,
+  isUploadingThisVariant,
+  isUploadDisabled,
+}: VariantFieldsProps) {
+  const variant = watch(`variants.${index}`);
+  const variantImageUrl = variant?.image_url;
+  const subVariants = variant?.sub_variants ?? [];
+  const hasSubVariants = subVariants.length > 0;
+  const isVariantSelected = Boolean(
+    variant?.name?.trim() &&
+    variant?.color &&
+    variant?.image_url &&
+    /^#[0-9A-Fa-f]{6}$/.test(variant.color),
+  );
+
+  const {
+    fields: subVariantFields,
+    append: appendSubVariant,
+    remove: removeSubVariant,
+  } = useFieldArray({
+    control,
+    name: `variants.${index}.sub_variants`,
+  });
+
+  const subVariantQuantity = subVariants.reduce(
+    (total, subVariant) => total + (Number(subVariant.quantity) || 0),
+    0,
+  );
+
+  useEffect(() => {
+    if (!hasSubVariants) return;
+
+    setValue(`variants.${index}.quantity`, subVariantQuantity, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  }, [hasSubVariants, index, setValue, subVariantQuantity]);
+
+  return (
+    <div className="space-y-3 rounded-lg border p-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="space-y-1">
+          <Label htmlFor={`variants.${index}.name`}>Name</Label>
+          <Input
+            id={`variants.${index}.name`}
+            {...register(`variants.${index}.name`)}
+            placeholder="e.g. Ruby Red"
+            autoComplete="off"
+          />
+          <FieldError message={errors.variants?.[index]?.name?.message} />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor={`variants.${index}.color`}>Color (hex)</Label>
+          <Input
+            id={`variants.${index}.color`}
+            {...register(`variants.${index}.color`)}
+            placeholder="#AABBCC"
+            autoComplete="off"
+          />
+          <FieldError message={errors.variants?.[index]?.color?.message} />
+        </div>
+        <div className="space-y-1">
+          <Label>Variant Image</Label>
+          {variantImageUrl ? (
+            <div className="relative h-24 w-24 overflow-hidden rounded-xl border">
+              <img
+                src={getImagePreviewSrc(variantImageUrl)}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+              <button
+                type="button"
+                onClick={() =>
+                  setValue(`variants.${index}.image_url`, "", {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  })
+                }
+                className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/50"
+                aria-label={`Remove variant ${index + 1} image`}
+              >
+                <X className="h-3 w-3 text-white" />
+              </button>
+            </div>
+          ) : (
+            <label className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border transition-colors hover:border-primary/50">
+              {isUploadingThisVariant ? (
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              ) : (
+                <Upload className="h-5 w-5 text-muted-foreground" />
+              )}
+              <span className="mt-1 text-[10px] text-muted-foreground">
+                Upload
+              </span>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(event) => onVariantImageUpload(event, index)}
+                disabled={isUploadDisabled}
+                className="hidden"
+              />
+            </label>
+          )}
+          <FieldError message={errors.variants?.[index]?.image_url?.message} />
+        </div>
+        <div className="flex items-end gap-2">
+          <div className="flex-1 space-y-1">
+            <Label htmlFor={`variants.${index}.quantity`}>Quantity</Label>
+            <Input
+              id={`variants.${index}.quantity`}
+              type="number"
+              min="0"
+              step="1"
+              {...register(`variants.${index}.quantity`, {
+                valueAsNumber: true,
+                setValueAs: (value) =>
+                  value === "" || value === null ? undefined : Number(value),
+              })}
+              placeholder="0"
+              readOnly={hasSubVariants}
+              className={hasSubVariants ? "bg-muted" : undefined}
+            />
+            {hasSubVariants && (
+              <p className="text-xs text-muted-foreground">
+                Calculated from sub-variant quantities.
+              </p>
+            )}
+            <FieldError message={errors.variants?.[index]?.quantity?.message} />
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={onRemove}
+            disabled={isUploadDisabled}
+            aria-label={`Remove variant ${index + 1}`}
+            className="shrink-0 text-muted-foreground hover:text-red-500"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {isVariantSelected && (
+        <div className="space-y-2 border-t pt-3">
+          <div className="flex items-center justify-between">
+            <Label>Sub-variants (sizes)</Label>
+            <button
+              type="button"
+              onClick={() => appendSubVariant({ size: "", quantity: 0 })}
+              disabled={isUploadDisabled}
+              className="flex items-center gap-1 rounded-sm border border-gray-200 px-2 py-1 text-sm text-black"
+            >
+              <Plus size={12} />
+              Add Size
+            </button>
+          </div>
+          {subVariantFields.length === 0 ? (
+            <p className="text-xs text-muted-foreground">
+              Optional. Add sizes to track stock per size for this variant.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {subVariantFields.map((subVariantField, subIndex) => (
+                <div
+                  key={subVariantField.id}
+                  className="grid grid-cols-1 items-end gap-2 rounded-md border border-dashed p-2 sm:grid-cols-[1fr_120px_auto]"
+                >
+                  <div className="space-y-1">
+                    <Label
+                      htmlFor={`variants.${index}.sub_variants.${subIndex}.size`}
+                    >
+                      Size
+                    </Label>
+                    <Input
+                      id={`variants.${index}.sub_variants.${subIndex}.size`}
+                      {...register(
+                        `variants.${index}.sub_variants.${subIndex}.size`,
+                      )}
+                      placeholder="e.g. S, M, L"
+                      autoComplete="off"
+                    />
+                    <FieldError
+                      message={
+                        errors.variants?.[index]?.sub_variants?.[subIndex]?.size
+                          ?.message
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label
+                      htmlFor={`variants.${index}.sub_variants.${subIndex}.quantity`}
+                    >
+                      Quantity
+                    </Label>
+                    <Input
+                      id={`variants.${index}.sub_variants.${subIndex}.quantity`}
+                      type="number"
+                      min="0"
+                      step="1"
+                      {...register(
+                        `variants.${index}.sub_variants.${subIndex}.quantity`,
+                        {
+                          valueAsNumber: true,
+                          setValueAs: (value) =>
+                            value === "" || value === null
+                              ? undefined
+                              : Number(value),
+                        },
+                      )}
+                      placeholder="0"
+                    />
+                    <FieldError
+                      message={
+                        errors.variants?.[index]?.sub_variants?.[subIndex]
+                          ?.quantity?.message
+                      }
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeSubVariant(subIndex)}
+                    disabled={isUploadDisabled}
+                    aria-label={`Remove sub-variant ${subIndex + 1}`}
+                    className="shrink-0 text-muted-foreground hover:text-red-500"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function ProductModal() {
   const { createProductData, isEditMode, setIsOpen } =
@@ -202,7 +516,10 @@ export default function ProductModal() {
   }, [form, isEditMode]);
 
   const onSubmit: SubmitHandler<CreateProductFormFields> = async (values) => {
-    const variants = values.variants.length > 0 ? values.variants : undefined;
+    const variants =
+      values.variants.length > 0
+        ? formatVariantsForPayload(values.variants)
+        : undefined;
     const productPayload: ProductCreate = {
       name: values.name,
       description: values.description,
@@ -362,7 +679,7 @@ export default function ProductModal() {
   const variants = form.watch("variants");
   const hasVariants = variants.length > 0;
   const variantQuantity = variants.reduce(
-    (total, variant) => total + (Number(variant.quantity) || 0),
+    (total, variant) => total + getVariantQuantity(variant),
     0,
   );
 
@@ -553,7 +870,13 @@ export default function ProductModal() {
           <button
             type="button"
             onClick={() =>
-              append({ name: "", color: "", image_url: "", quantity: 0 })
+              append({
+                name: "",
+                color: "",
+                image_url: "",
+                quantity: 0,
+                sub_variants: [],
+              })
             }
             disabled={uploadingVariantIndex !== null}
             className="flex items-center gap-1 text-sm text-black border border-gray-200 rounded-sm py-1 px-2"
@@ -562,121 +885,21 @@ export default function ProductModal() {
             Add Variant
           </button>
         </div>
-        {fields.map((field, index) => {
-          const variantImageUrl = variants[index]?.image_url;
-          const isUploadingThisVariant = uploadingVariantIndex === index;
-
-          return (
-            <div
-              key={field.id}
-              className="grid grid-cols-1 gap-3 rounded-lg border p-3 sm:grid-cols-2"
-            >
-              <div className="space-y-1">
-                <Label htmlFor={`variants.${index}.name`}>Name</Label>
-                <Input
-                  id={`variants.${index}.name`}
-                  {...form.register(`variants.${index}.name`)}
-                  placeholder="e.g. Ruby Red"
-                  autoComplete="off"
-                />
-                <FieldError message={errors.variants?.[index]?.name?.message} />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor={`variants.${index}.color`}>Color (hex)</Label>
-                <Input
-                  id={`variants.${index}.color`}
-                  {...form.register(`variants.${index}.color`)}
-                  placeholder="#AABBCC"
-                  autoComplete="off"
-                />
-                <FieldError
-                  message={errors.variants?.[index]?.color?.message}
-                />
-              </div>
-              <div className="space-y-1">
-                <Label>Variant Image</Label>
-                {variantImageUrl ? (
-                  <div className="relative h-24 w-24 overflow-hidden rounded-xl border">
-                    <img
-                      src={getImagePreviewSrc(variantImageUrl)}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        form.setValue(`variants.${index}.image_url`, "", {
-                          shouldDirty: true,
-                          shouldValidate: true,
-                        })
-                      }
-                      className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/50"
-                      aria-label={`Remove variant ${index + 1} image`}
-                    >
-                      <X className="h-3 w-3 text-white" />
-                    </button>
-                  </div>
-                ) : (
-                  <label className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border transition-colors hover:border-primary/50">
-                    {isUploadingThisVariant ? (
-                      <Loader2 className="h-5 w-5 animate-spin text-neutral-500" />
-                    ) : (
-                      <Upload className="h-5 w-5 text-neutral-500" />
-                    )}
-                    <span className="mt-1 text-[10px] text-neutral-500">
-                      Upload
-                    </span>
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      onChange={(event) =>
-                        handleVariantImageUpload(event, index)
-                      }
-                      disabled={uploadingVariantIndex !== null}
-                      className="hidden"
-                    />
-                  </label>
-                )}
-                <FieldError
-                  message={errors.variants?.[index]?.image_url?.message}
-                />
-              </div>
-              <div className="flex items-end gap-2">
-                <div className="flex-1 space-y-1">
-                  <Label htmlFor={`variants.${index}.quantity`}>Quantity</Label>
-                  <Input
-                    id={`variants.${index}.quantity`}
-                    type="number"
-                    min="0"
-                    step="1"
-                    {...form.register(`variants.${index}.quantity`, {
-                      valueAsNumber: true,
-                      setValueAs: (value) =>
-                        value === "" || value === null
-                          ? undefined
-                          : Number(value),
-                    })}
-                    placeholder="0"
-                  />
-                  <FieldError
-                    message={errors.variants?.[index]?.quantity?.message}
-                  />
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => remove(index)}
-                  disabled={uploadingVariantIndex !== null}
-                  aria-label={`Remove variant ${index + 1}`}
-                  className="shrink-0 text-neutral-500 hover:text-red-500"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          );
-        })}
+        {fields.map((field, index) => (
+          <VariantFields
+            key={field.id}
+            index={index}
+            control={form.control}
+            register={form.register}
+            setValue={form.setValue}
+            watch={form.watch}
+            errors={errors}
+            onRemove={() => remove(index)}
+            onVariantImageUpload={handleVariantImageUpload}
+            isUploadingThisVariant={uploadingVariantIndex === index}
+            isUploadDisabled={uploadingVariantIndex !== null}
+          />
+        ))}
       </div>
 
       <div className="flex justify-end gap-3 pt-4 border-t">

@@ -1,4 +1,5 @@
 import Footer from "@/components/shared/footer";
+import MediaPlayer from "@/components/shared/media-player";
 import Navbar from "@/components/shared/navbar";
 
 export default function RootLayout({
@@ -10,6 +11,7 @@ export default function RootLayout({
     <div className="bg-background">
       <Navbar />
       {children}
+      <MediaPlayer />
       <Footer />
     </div>
   );

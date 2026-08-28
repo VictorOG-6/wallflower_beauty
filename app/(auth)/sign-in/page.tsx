@@ -6,6 +6,12 @@ import { getAuthPayload, storeAuthToken, validateToken } from "@/lib/auth";
 import { API_URL } from "@/lib/constants";
 import processError from "@/lib/error";
 import { $http, addAccessTokenToHttpInstance } from "@/lib/http";
+import {
+  getAxiosErrorDetail,
+  isUnverifiedLoginError,
+  redirectUnverifiedUserToOtp,
+  UNVERIFIED_LOGIN_DETAIL,
+} from "@/lib/verification-flow";
 import { userKeys } from "@/lib/react-query/query-keys";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
@@ -117,6 +123,12 @@ const SignIn = () => {
     } catch (error) {
       console.error("Sign in error:", error);
       if (error instanceof AxiosError) {
+        if (isUnverifiedLoginError(error)) {
+          await redirectUnverifiedUserToOtp(values.username, router, {
+            notify: getAxiosErrorDetail(error) ?? UNVERIFIED_LOGIN_DETAIL,
+          });
+          return;
+        }
         processError(error);
       } else {
         toast.error("Sign in failed. Please try again.");

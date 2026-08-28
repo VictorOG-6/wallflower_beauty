@@ -10,6 +10,7 @@ export interface User {
   profile_image_url: string;
   total_orders: number;
   total_spent: number;
+  total_reviews: number;
 }
 
 export interface UserWithRelations extends User {
@@ -45,6 +46,7 @@ export interface CartItem {
   cart: Cart;
   product_id: string;
   product_variant_id?: string | null;
+  product_sub_variant_id?: string | null;
   product: Product;
   quantity: number;
   total_price: number;
@@ -192,6 +194,17 @@ export interface ReviewFetchProps {
 
 export type ProductStatus = "draft" | "published" | "archived";
 
+export interface ProductSubVariant {
+  id: string;
+  size: string;
+  quantity: number;
+}
+
+export type ProductSubVariantInput = Pick<
+  ProductSubVariant,
+  "size" | "quantity"
+>;
+
 export interface ProductVariant {
   id: string;
   color: string;
@@ -199,12 +212,15 @@ export interface ProductVariant {
   image_url: string;
   quantity: number;
   product_id: string;
+  sub_variants?: ProductSubVariant[];
 }
 
 export type ProductVariantInput = Pick<
   ProductVariant,
   "name" | "image_url" | "color" | "quantity"
->;
+> & {
+  sub_variants?: ProductSubVariantInput[];
+};
 
 export interface Product {
   id: string;

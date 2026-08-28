@@ -52,6 +52,16 @@ const CartItemRow = ({
             className={`text-secondary ${compact ? "text-[11px] mt-0.5" : "text-sm mt-1"}`}
           >
             {item.product.variant_name}
+            {item.product.sub_variant_size
+              ? ` · ${item.product.sub_variant_size}`
+              : ""}
+          </p>
+        )}
+        {!item.product.variant_name && item.product.sub_variant_size && (
+          <p
+            className={`text-secondary ${compact ? "text-[11px] mt-0.5" : "text-sm mt-1"}`}
+          >
+            Size: {item.product.sub_variant_size}
           </p>
         )}
         {!compact && item.product.category && (
@@ -60,7 +70,7 @@ const CartItemRow = ({
           </p>
         )}
         <p
-          className={`text-secondary ${compact ? "text-xs" : "text-sm"} ${item.product.variant_name || !compact ? "mt-2" : "mt-1"}`}
+          className={`text-secondary ${compact ? "text-xs" : "text-sm"} ${item.product.variant_name || item.product.sub_variant_size || !compact ? "mt-2" : "mt-1"}`}
         >
           {formatToNaira(item.price)}
         </p>
@@ -71,7 +81,11 @@ const CartItemRow = ({
               type="button"
               disabled={isMutating}
               onClick={() =>
-                decrementItem(item.product_id, item.product_variant_id)
+                decrementItem(
+                  item.product_id,
+                  item.product_variant_id,
+                  item.product_sub_variant_id,
+                )
               }
               className="disabled:opacity-50 cursor-pointer"
               aria-label={`Decrease ${item.product.name} quantity`}
@@ -87,7 +101,11 @@ const CartItemRow = ({
               type="button"
               disabled={isMutating}
               onClick={() =>
-                incrementItem(item.product_id, item.product_variant_id)
+                incrementItem(
+                  item.product_id,
+                  item.product_variant_id,
+                  item.product_sub_variant_id,
+                )
               }
               className="disabled:opacity-50 cursor-pointer"
               aria-label={`Increase ${item.product.name} quantity`}
@@ -99,7 +117,13 @@ const CartItemRow = ({
           <button
             type="button"
             disabled={isMutating}
-            onClick={() => removeItem(item.product_id, item.product_variant_id)}
+            onClick={() =>
+              removeItem(
+                item.product_id,
+                item.product_variant_id,
+                item.product_sub_variant_id,
+              )
+            }
             className="text-red-500 transition-colors hover:text-red-600 disabled:opacity-50 cursor-pointer"
             aria-label={`Remove ${item.product.name} from cart`}
           >
@@ -139,7 +163,7 @@ export default function CartItems({
     <div className={compact ? "space-y-4" : "space-y-5"}>
       {displayedItems.map((item) => (
         <CartItemRow
-          key={`${item.product_id}:${item.product_variant_id ?? ""}`}
+          key={`${item.product_id}:${item.product_variant_id ?? ""}:${item.product_sub_variant_id ?? ""}`}
           item={item}
           compact={compact}
         />

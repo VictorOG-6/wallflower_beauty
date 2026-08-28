@@ -8,11 +8,11 @@ import { FaTiktok } from "react-icons/fa";
 import Link from "next/link";
 
 const VIDEO_SOURCES = [
-  "/videos/video1.mp4",
-  "/videos/video2.mp4",
-  "/videos/video3.mp4",
-  "/videos/video4.mp4",
-  "/videos/video5.mp4",
+  "/videos/video-1.mp4",
+  "/videos/video-2.mp4",
+  "/videos/video-3.mp4",
+  "/videos/video-4.mp4",
+  "/videos/video-5.mp4",
 ] as const;
 
 const MediaPlayer = () => {

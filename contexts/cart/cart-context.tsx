@@ -3,6 +3,7 @@
 import useFetchCart from "@/hooks/cart/use-fetch-cart";
 import { useCreateCartItem } from "@/hooks/cart/use-create-cart-item";
 import { useDeleteCartItem } from "@/hooks/cart/use-delete-cart-item";
+import { useUpdateCartItem } from "@/hooks/cart/use-update-cart-item";
 import { Cart, CartItem, Product } from "@/types";
 import React, {
   createContext,
@@ -14,22 +15,23 @@ import React, {
   useSyncExternalStore,
 } from "react";
 import { toast } from "sonner";
-import { useUpdateCartItem } from "@/hooks/cart/use-update-cart-item";
 
-const CART_STORAGE_KEY = "wallflower_beauty_cart";
-const CART_STORAGE_EVENT = "wallflower-beauty-cart-updated";
+const CART_STORAGE_KEY = "anniqcleo_cart";
+const CART_STORAGE_EVENT = "anniqcleo-cart-updated";
 
 export type LocalCartProduct = Pick<
   Product,
   "id" | "name" | "image_url" | "price" | "category" | "description"
 > & {
   variant_name?: string;
+  sub_variant_size?: string;
 };
 
 export interface LocalCartItem {
   id?: string;
   product_id: string;
   product_variant_id?: string;
+  product_sub_variant_id?: string;
   product: LocalCartProduct;
   quantity: number;
   price: number;
@@ -45,10 +47,23 @@ interface CartContextValue {
     product: Product,
     quantity?: number,
     productVariantId?: string,
+    productSubVariantId?: string,
   ) => void;
-  incrementItem: (productId: string, productVariantId?: string) => void;
-  decrementItem: (productId: string, productVariantId?: string) => void;
-  removeItem: (productId: string, productVariantId?: string) => void;
+  incrementItem: (
+    productId: string,
+    productVariantId?: string,
+    productSubVariantId?: string,
+  ) => void;
+  decrementItem: (
+    productId: string,
+    productVariantId?: string,
+    productSubVariantId?: string,
+  ) => void;
+  removeItem: (
+    productId: string,
+    productVariantId?: string,
+    productSubVariantId?: string,
+  ) => void;
   clearLocalCart: () => void;
   clearCart: () => void;
 }
@@ -61,8 +76,11 @@ let cachedCartItems: LocalCartItem[] = EMPTY_CART_ITEMS;
 
 const isBrowser = () => typeof window !== "undefined";
 
-const getCartItemKey = (productId: string, productVariantId?: string | null) =>
-  `${productId}:${productVariantId ?? ""}`;
+const getCartItemKey = (
+  productId: string,
+  productVariantId?: string | null,
+  productSubVariantId?: string | null,
+) => `${productId}:${productVariantId ?? ""}:${productSubVariantId ?? ""}`;
 
 const sanitizeCartItem = (item: LocalCartItem): LocalCartItem => ({
   ...item,
@@ -139,9 +157,13 @@ const subscribeToAuthStorage = (onStoreChange: () => void) => {
 const toLocalProduct = (
   product: Product,
   productVariantId?: string | null,
+  productSubVariantId?: string | null,
 ): LocalCartProduct => {
   const variant = product.variants?.find(
     (productVariant) => productVariant.id === productVariantId,
+  );
+  const subVariant = variant?.sub_variants?.find(
+    (productSubVariant) => productSubVariant.id === productSubVariantId,
   );
 
   return {
@@ -152,6 +174,7 @@ const toLocalProduct = (
     category: product.category,
     description: product.description,
     ...(variant?.name ? { variant_name: variant.name } : {}),
+    ...(subVariant?.size ? { sub_variant_size: subVariant.size } : {}),
   };
 };
 
@@ -168,8 +191,15 @@ const toLocalCartItem = (item: CartItem): LocalCartItem | null => {
     ...(item.product_variant_id
       ? { product_variant_id: item.product_variant_id }
       : {}),
+    ...(item.product_sub_variant_id
+      ? { product_sub_variant_id: item.product_sub_variant_id }
+      : {}),
     product: product
-      ? toLocalProduct(product, item.product_variant_id)
+      ? toLocalProduct(
+          product,
+          item.product_variant_id,
+          item.product_sub_variant_id,
+        )
       : {
           id: productId,
           name: "Product",
@@ -226,18 +256,25 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       const localItemKey = getCartItemKey(
         localItem.product_id,
         localItem.product_variant_id,
+        localItem.product_sub_variant_id,
       );
       const existingItem = currentItems.find(
         (item) =>
-          getCartItemKey(item.product_id, item.product_variant_id) ===
-          localItemKey,
+          getCartItemKey(
+            item.product_id,
+            item.product_variant_id,
+            item.product_sub_variant_id,
+          ) === localItemKey,
       );
 
       if (!existingItem) return [...currentItems, localItem];
 
       return currentItems.map((item) =>
-        getCartItemKey(item.product_id, item.product_variant_id) ===
-        localItemKey
+        getCartItemKey(
+          item.product_id,
+          item.product_variant_id,
+          item.product_sub_variant_id,
+        ) === localItemKey
           ? {
               ...localItem,
               quantity: existingItem.quantity,
@@ -249,7 +286,11 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
   const syncCreateToServer = useCallback(
     (item: LocalCartItem) => {
-      const itemKey = getCartItemKey(item.product_id, item.product_variant_id);
+      const itemKey = getCartItemKey(
+        item.product_id,
+        item.product_variant_id,
+        item.product_sub_variant_id,
+      );
       if (!hasAccessToken || pendingServerCreates.current.has(itemKey)) {
         return;
       }
@@ -260,6 +301,9 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
           product_id: item.product_id,
           ...(item.product_variant_id
             ? { product_variant_id: item.product_variant_id }
+            : {}),
+          ...(item.product_sub_variant_id
+            ? { product_sub_variant_id: item.product_sub_variant_id }
             : {}),
           quantity: item.quantity,
         },
@@ -313,7 +357,11 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
       serverItems.forEach((item) => {
         mergedItemsByKey.set(
-          getCartItemKey(item.product_id, item.product_variant_id),
+          getCartItemKey(
+            item.product_id,
+            item.product_variant_id,
+            item.product_sub_variant_id,
+          ),
           item,
         );
       });
@@ -322,6 +370,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         const itemKey = getCartItemKey(
           item.product_id,
           item.product_variant_id,
+          item.product_sub_variant_id,
         );
         const serverItem = mergedItemsByKey.get(itemKey);
         mergedItemsByKey.set(itemKey, {
@@ -349,17 +398,29 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       product: Product,
       quantity = 1,
       productVariantId = product.variants?.[0]?.id,
+      productSubVariantId?: string,
     ) => {
       const safeQuantity = Math.max(1, quantity);
-      const localProduct = toLocalProduct(product, productVariantId);
-      const itemKey = getCartItemKey(product.id, productVariantId);
+      const localProduct = toLocalProduct(
+        product,
+        productVariantId,
+        productSubVariantId,
+      );
+      const itemKey = getCartItemKey(
+        product.id,
+        productVariantId,
+        productSubVariantId,
+      );
       let nextItem: LocalCartItem | undefined;
 
       updateStoredCartItems((currentItems) => {
         const existingItem = currentItems.find(
           (item) =>
-            getCartItemKey(item.product_id, item.product_variant_id) ===
-            itemKey,
+            getCartItemKey(
+              item.product_id,
+              item.product_variant_id,
+              item.product_sub_variant_id,
+            ) === itemKey,
         );
 
         if (existingItem) {
@@ -371,7 +432,11 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
           };
 
           return currentItems.map((item) =>
-            getCartItemKey(item.product_id, item.product_variant_id) === itemKey
+            getCartItemKey(
+              item.product_id,
+              item.product_variant_id,
+              item.product_sub_variant_id,
+            ) === itemKey
               ? nextItem!
               : item,
           );
@@ -380,6 +445,9 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         nextItem = {
           product_id: product.id,
           ...(productVariantId ? { product_variant_id: productVariantId } : {}),
+          ...(productSubVariantId
+            ? { product_sub_variant_id: productSubVariantId }
+            : {}),
           product: localProduct,
           quantity: safeQuantity,
           price: product.price,
@@ -400,18 +468,34 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   );
 
   const incrementItem = useCallback(
-    (productId: string, productVariantId?: string) => {
-      const itemKey = getCartItemKey(productId, productVariantId);
+    (
+      productId: string,
+      productVariantId?: string,
+      productSubVariantId?: string,
+    ) => {
+      const itemKey = getCartItemKey(
+        productId,
+        productVariantId,
+        productSubVariantId,
+      );
       const existingItem = readStoredCartItems().find(
         (item) =>
-          getCartItemKey(item.product_id, item.product_variant_id) === itemKey,
+          getCartItemKey(
+            item.product_id,
+            item.product_variant_id,
+            item.product_sub_variant_id,
+          ) === itemKey,
       );
       if (!existingItem) return;
 
       const nextQuantity = existingItem.quantity + 1;
       updateStoredCartItems((currentItems) =>
         currentItems.map((item) =>
-          getCartItemKey(item.product_id, item.product_variant_id) === itemKey
+          getCartItemKey(
+            item.product_id,
+            item.product_variant_id,
+            item.product_sub_variant_id,
+          ) === itemKey
             ? { ...item, quantity: nextQuantity }
             : item,
         ),
@@ -422,19 +506,34 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   );
 
   const removeItem = useCallback(
-    (productId: string, productVariantId?: string) => {
-      const itemKey = getCartItemKey(productId, productVariantId);
+    (
+      productId: string,
+      productVariantId?: string,
+      productSubVariantId?: string,
+    ) => {
+      const itemKey = getCartItemKey(
+        productId,
+        productVariantId,
+        productSubVariantId,
+      );
       const existingItem = readStoredCartItems().find(
         (item) =>
-          getCartItemKey(item.product_id, item.product_variant_id) === itemKey,
+          getCartItemKey(
+            item.product_id,
+            item.product_variant_id,
+            item.product_sub_variant_id,
+          ) === itemKey,
       );
       if (!existingItem) return;
 
       updateStoredCartItems((currentItems) =>
         currentItems.filter(
           (item) =>
-            getCartItemKey(item.product_id, item.product_variant_id) !==
-            itemKey,
+            getCartItemKey(
+              item.product_id,
+              item.product_variant_id,
+              item.product_sub_variant_id,
+            ) !== itemKey,
         ),
       );
 
@@ -450,23 +549,39 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   );
 
   const decrementItem = useCallback(
-    (productId: string, productVariantId?: string) => {
-      const itemKey = getCartItemKey(productId, productVariantId);
+    (
+      productId: string,
+      productVariantId?: string,
+      productSubVariantId?: string,
+    ) => {
+      const itemKey = getCartItemKey(
+        productId,
+        productVariantId,
+        productSubVariantId,
+      );
       const existingItem = readStoredCartItems().find(
         (item) =>
-          getCartItemKey(item.product_id, item.product_variant_id) === itemKey,
+          getCartItemKey(
+            item.product_id,
+            item.product_variant_id,
+            item.product_sub_variant_id,
+          ) === itemKey,
       );
       if (!existingItem) return;
 
       const nextQuantity = existingItem.quantity - 1;
       if (nextQuantity <= 0) {
-        removeItem(productId, productVariantId);
+        removeItem(productId, productVariantId, productSubVariantId);
         return;
       }
 
       updateStoredCartItems((currentItems) =>
         currentItems.map((item) =>
-          getCartItemKey(item.product_id, item.product_variant_id) === itemKey
+          getCartItemKey(
+            item.product_id,
+            item.product_variant_id,
+            item.product_sub_variant_id,
+          ) === itemKey
             ? { ...item, quantity: nextQuantity }
             : item,
         ),

@@ -7,6 +7,7 @@ import { useInitializePayment } from "@/hooks/payment/use-initialize-payment";
 import processError from "@/lib/error";
 import { redirectToPaystack } from "@/lib/paystack";
 import { formatToNaira } from "@/lib/utils";
+import { OrderItem } from "@/types";
 import { AxiosError } from "axios";
 import { format } from "date-fns";
 import { ArrowLeft, CreditCard, Loader2, Package, XCircle } from "lucide-react";
@@ -199,7 +200,7 @@ export default function OrderDetailPage() {
             </h2>
             {order.order_items?.length ? (
               <div className="space-y-4">
-                {order.order_items.map((item) => (
+                {order.order_items.map((item: OrderItem) => (
                   <div
                     key={item.id}
                     className="flex flex-col sm:flex-row sm:items-center gap-4 rounded-2xl bg-white p-4"

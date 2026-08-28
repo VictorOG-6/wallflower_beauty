@@ -175,7 +175,7 @@ export default function ShadeFinder() {
                     </div>
                   </div>
                 </div>
-                <div className="flex mt-4 lg:hidden justify-center">
+                <div className="flex md:col-span-2 mt-4 md:mt-0 lg:mt-4 lg:hidden justify-center pb-0 md:pb-4 lg:pb-0">
                   <Button
                     onClick={() => setStep(2)}
                     className="w-full rounded-none bg-primary/80 hover:bg-primary/60 cursor-pointer"

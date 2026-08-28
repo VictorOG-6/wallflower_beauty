@@ -3,7 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { useFetchOrders } from "@/hooks/order/use-fetch-order";
+import { useFetchAllOrders } from "@/hooks/order/use-fetch-all-orders";
 import { OrderStatus } from "@/types";
 
 const statusStyles: Record<OrderStatus, string> = {
@@ -18,7 +18,7 @@ const statusStyles: Record<OrderStatus, string> = {
 };
 
 export default function RecentOrders() {
-  const { data: orders } = useFetchOrders();
+  const { data: orders } = useFetchAllOrders();
   if (!orders || orders.length === 0) {
     return (
       <div className="bg-card rounded-2xl border border-border p-6">

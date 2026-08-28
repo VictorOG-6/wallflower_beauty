@@ -9,15 +9,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { Check, Eye, EyeOff, X } from "lucide-react";
 import { AxiosError } from "axios";
-import { $http, addAccessTokenToHttpInstance } from "@/lib/http";
-import type { AuthPayload } from "@/lib/auth";
-import { getAuthPayload, storeAuthToken, validateToken } from "@/lib/auth";
+import { $http } from "@/lib/http";
 import { useRouter } from "next/navigation";
 import processError from "@/lib/error";
+import {
+  getAxiosErrorDetail,
+  isEmailAlreadyRegisteredError,
+  redirectUnverifiedUserToOtp,
+  storePendingVerificationEmail,
+} from "@/lib/verification-flow";
 import { API_URL } from "@/lib/constants";
 import { toast } from "sonner";
-import { userKeys } from "@/lib/react-query/query-keys";
-import { useQueryClient } from "@tanstack/react-query";
 
 const signUpSchema = z
   .object({
@@ -53,9 +55,14 @@ const signUpSchema = z
 
 type SignUpFormField = z.infer<typeof signUpSchema>;
 
-type SignUpResponse = AuthPayload | { data?: AuthPayload };
-
-const ADMIN_ROLES = new Set(["admin", "staff"]);
+type SignUpResponse = {
+  message: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  };
+};
 
 const SLIDES = [
   {
@@ -88,7 +95,6 @@ const SLIDE_INTERVAL_MS = 5500;
 
 const SignUp = () => {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
@@ -161,36 +167,30 @@ const SignUp = () => {
     setIsLoading(true);
 
     try {
-      const { data } = await $http.post<SignUpResponse>("/user", values);
-      const authPayload = getAuthPayload(data);
-
-      validateToken(authPayload.access_token);
-      await storeAuthToken(authPayload.access_token, authPayload.refresh_token);
-      addAccessTokenToHttpInstance(authPayload.access_token);
-      sessionStorage.setItem("access_token", authPayload.access_token);
-      sessionStorage.setItem("refresh_token", authPayload.refresh_token);
-
-      sessionStorage.setItem(
-        "user_session",
-        JSON.stringify({
-          email: authPayload.user.email,
-          name: authPayload.user.name,
-          role: authPayload.user.role,
-        }),
-      );
-
-      await queryClient.refetchQueries({
-        queryKey: userKeys.me,
-        type: "active",
+      const { data } = await $http.post<SignUpResponse>("/user", {
+        name: values.name,
+        email: values.email,
+        password: values.password,
       });
 
-      const destination = ADMIN_ROLES.has(authPayload.user.role)
-        ? "/admin"
-        : "/";
-      router.replace(destination);
+      storePendingVerificationEmail(values.email);
+      toast.success(
+        data.message ?? "Account created. Please verify your email.",
+      );
+      router.replace(`/verify-otp?email=${encodeURIComponent(values.email)}`);
     } catch (error) {
-      console.error("Sign in error:", error);
+      console.error("Sign up error:", error);
       if (error instanceof AxiosError) {
+        const detail = getAxiosErrorDetail(error);
+
+        if (detail && isEmailAlreadyRegisteredError(detail)) {
+          await redirectUnverifiedUserToOtp(values.email, router, {
+            notify:
+              "This email is already registered. Verify your email to continue.",
+          });
+          return;
+        }
+
         processError(error);
       } else {
         toast.error("Sign up failed. Please try again.");

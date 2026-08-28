@@ -14,7 +14,7 @@ import { format } from "date-fns";
 import { Order, OrderStatus, Pagination } from "@/types";
 import { LegacyColumnDef } from "@tanstack/react-table/legacy";
 import { formatToNaira } from "@/lib/utils";
-import { useFetchOrders } from "@/hooks/order/use-fetch-order";
+import { useFetchAllOrders } from "@/hooks/order/use-fetch-all-orders";
 import { OrderStatusBadge } from "@/components/admin/order-status-badge";
 import OrderDetailSheet from "@/components/admin/order-detail-sheet";
 import { Text } from "@/components/ui/text";
@@ -40,7 +40,7 @@ export default function Orders() {
     pageSize: 10,
   });
 
-  const { data: orders = [], isLoading } = useFetchOrders({
+  const { data: orders = [], isLoading } = useFetchAllOrders({
     page_size: pagination.pageSize,
     page: pagination.pageIndex + 1,
     status: statusFilter === "all" ? undefined : (statusFilter as OrderStatus),
