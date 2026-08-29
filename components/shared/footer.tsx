@@ -116,10 +116,16 @@ const Footer = () => {
             <p className="text-lg font-semibold">2026 WALLFLOWER BEAUTY</p>
           </div>
           <div className="flex items-center gap-4">
-            <FaInstagram size={24} />
-            <FaFacebook size={24} />
-            <FaXTwitter size={24} />
-            <FaTiktok size={24} />
+            <FaInstagram
+              href="https://www.instagram.com/wallflowerr.beauty/"
+              size={24}
+            />
+            <FaFacebook href="#" size={24} />
+            <FaXTwitter href="#" size={24} />
+            <FaTiktok
+              href="https://www.tiktok.com/@wallflower.beauty/"
+              size={24}
+            />
           </div>
         </div>
       </div>

@@ -16,8 +16,8 @@ import React, {
 } from "react";
 import { toast } from "sonner";
 
-const CART_STORAGE_KEY = "anniqcleo_cart";
-const CART_STORAGE_EVENT = "anniqcleo-cart-updated";
+const CART_STORAGE_KEY = "wallflower_beauty_cart";
+const CART_STORAGE_EVENT = "wallflower_beauty-cart-updated";
 
 export type LocalCartProduct = Pick<
   Product,

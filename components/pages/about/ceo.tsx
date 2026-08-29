@@ -1,8 +1,7 @@
 import Link from "next/link";
 import React from "react";
 import { AiFillInstagram } from "react-icons/ai";
-import { FaYoutube } from "react-icons/fa";
-import { FaXTwitter } from "react-icons/fa6";
+import { FaTiktok, FaYoutube } from "react-icons/fa";
 
 const CEO = () => {
   return (
@@ -25,22 +24,22 @@ const CEO = () => {
           </p>
           <div className="flex items-center gap-6">
             <Link
-              href="https://www.instagram.com/anniqcleo"
+              href="https://www.instagram.com/wallflowerr.beauty/"
               className="w-12.5 h-12.5 flex rounded-full items-center justify-center bg-primary text-white transition-colors duration-300 cursor-pointer hover:text-primary hover:bg-white"
             >
               <AiFillInstagram size={35} />
             </Link>
             <Link
-              href="https://www.youtube.com/@anniqcleo"
+              href="#"
               className="w-12.5 h-12.5 flex rounded-full items-center justify-center bg-primary text-white transition-colors duration-300 cursor-pointer hover:text-primary hover:bg-white"
             >
               <FaYoutube size={35} />
             </Link>
             <Link
-              href="https://www.x.com/anniqcleo"
+              href="https://www.tiktok.com/@wallflower.beauty/"
               className="w-12.5 h-12.5 flex rounded-full items-center justify-center bg-primary text-white transition-colors duration-300 cursor-pointer hover:text-primary hover:bg-white"
             >
-              <FaXTwitter size={35} />
+              <FaTiktok size={35} />
             </Link>
           </div>
         </div>
@@ -58,22 +57,22 @@ const CEO = () => {
           <h2 className="font-inter font-bold">~CEO, EMMANUELLA</h2>
           <div className="flex lg:hidden items-center gap-4 mt-6 mb-11">
             <Link
-              href="https://www.instagram.com/anniqcleo"
+              href="https://www.instagram.com/wallflowerr.beauty/"
               className="w-10 h-10 md:w-12.5 md:h-12.5 flex rounded-full items-center justify-center bg-primary text-white transition-colors duration-300 cursor-pointer hover:text-primary hover:bg-white"
             >
               <AiFillInstagram size={30} />
             </Link>
             <Link
-              href="https://www.youtube.com/@anniqcleo"
+              href="#"
               className="w-10 h-10 md:w-12.5 md:h-12.5 flex rounded-full items-center justify-center bg-primary text-white transition-colors duration-300 cursor-pointer hover:text-primary hover:bg-white"
             >
               <FaYoutube size={30} />
             </Link>
             <Link
-              href="https://www.x.com/anniqcleo"
+              href="https://www.tiktok.com/@wallflower.beauty/"
               className="w-10 h-10 md:w-12.5 md:h-12.5 flex rounded-full items-center justify-center bg-primary text-white transition-colors duration-300 cursor-pointer hover:text-primary hover:bg-white"
             >
-              <FaXTwitter size={30} />
+              <FaTiktok size={30} />
             </Link>
           </div>
         </div>

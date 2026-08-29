@@ -69,7 +69,7 @@ const MediaPlayer = () => {
           />
           <div className="flex items-center justify-center gap-3 p-2.5 text-white">
             <Link
-              href="https://x.com/anniqcleo"
+              href="#"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="X (Twitter)"
@@ -81,7 +81,7 @@ const MediaPlayer = () => {
             </Link>
 
             <Link
-              href="https://instagram.com/anniqcleo"
+              href="https://instagram.com/wallflowerr.beauty/"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram"
@@ -93,7 +93,7 @@ const MediaPlayer = () => {
             </Link>
 
             <Link
-              href="https://tiktok.com/@anniqcleo"
+              href="https://tiktok.com/@wallflower.beauty/"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="TikTok"

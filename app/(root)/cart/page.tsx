@@ -69,7 +69,7 @@ export default function CartPage() {
 
         <div className="flex flex-col gap-3 mb-10">
           {/* <p className="font-roboto-mono text-primary text-sm">
-            Anniqcleo Cart
+            Wallflower Beauty Cart
           </p> */}
           <h1 className="text-3xl md:text-6xl text-primary">Your Cart</h1>
           <p className="text-secondary">

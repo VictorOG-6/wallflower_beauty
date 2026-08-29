@@ -289,7 +289,7 @@ function VerifyOTPContent() {
           <div className="mb-8 flex flex-col items-center text-center">
             <Image
               src="/logo.png"
-              alt="Anniqcleo logo"
+              alt="Wallflower Beauty logo"
               width={160}
               height={40}
               className="h-auto w-32 sm:w-40"

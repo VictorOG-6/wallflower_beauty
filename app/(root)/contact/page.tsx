@@ -53,19 +53,19 @@ const Contact = () => {
             </div>
             <div className="flex items-center justify-center md:justify-start gap-4">
               <Link
-                href="https://www.x.com/anniqcleo"
+                href="#"
                 className="w-7.5 h-7.5 rounded-full bg-white flex items-center justify-center text-secondary-foreground cursor-pointer transition-all duration-300 border hover:text-white hover:bg-secondary-foreground hover:border-white"
               >
                 <FaXTwitter size={20} />
               </Link>
               <Link
-                href="https://www.instagram.com/anniqcleo"
+                href="https://www.instagram.com/wallflowerr.beauty/"
                 className="w-7.5 h-7.5 rounded-full bg-white flex items-center justify-center text-secondary-foreground cursor-pointer transition-all duration-300 border hover:text-white hover:bg-secondary-foreground hover:border-white"
               >
                 <AiFillInstagram size={20} />
               </Link>
               <Link
-                href="https://www.tiktok.com/@anniqcleo"
+                href="https://www.tiktok.com/@wallflower.beauty/"
                 className="w-7.5 h-7.5 rounded-full bg-white flex items-center justify-center text-secondary-foreground cursor-pointer transition-all duration-300 border hover:text-white hover:bg-secondary-foreground hover:border-white"
               >
                 <FaTiktok size={20} />
