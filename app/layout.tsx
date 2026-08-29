@@ -23,7 +23,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Wallflower Beauty",
+  title: {
+    default: "Wallflower Beauty",
+    template: "%s | Wallflower Beauty",
+  },
   description:
     "Wallflower Beauty is a beauty brand that sells beauty and fashion products.",
 
