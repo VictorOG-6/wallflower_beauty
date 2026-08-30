@@ -96,7 +96,11 @@ const SignIn = () => {
       const authPayload = getAuthPayload(data);
 
       validateToken(authPayload.access_token);
-      await storeAuthToken(authPayload.access_token, authPayload.refresh_token);
+      await storeAuthToken(
+        authPayload.access_token,
+        authPayload.refresh_token,
+        authPayload.user.role,
+      );
       addAccessTokenToHttpInstance(authPayload.access_token);
       sessionStorage.setItem("access_token", authPayload.access_token);
       sessionStorage.setItem("refresh_token", authPayload.refresh_token);

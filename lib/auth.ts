@@ -48,14 +48,14 @@ export const getAuthPayload = (response: AuthResponse): AuthPayload => {
 export const storeAuthToken = async (
   accessToken: string,
   refreshToken: string,
+  role?: UserRole,
 ): Promise<void> => {
   try {
-    // For Next.js web app - use server action or API route to set httpOnly cookie
     const response = await fetch("/api/auth/session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ accessToken, refreshToken }),
-      credentials: "include", // Important for cookies
+      body: JSON.stringify({ accessToken, refreshToken, role }),
+      credentials: "include",
     });
 
     if (!response.ok) {
