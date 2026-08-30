@@ -18,11 +18,13 @@ const Customers = () => {
           <h2 className="text-sm font-roboto-mono">Follow the glow</h2>
           <div className="flex items-center gap-3">
             <FaInstagram
+              href="https://www.instagram.com/wallflowerr.beauty"
               size={24}
               className="cursor-pointer transition-all duration-300 hover:text-[#F35C97]"
             />
             <div className="bg-[#D9D9D9] w-0.5 h-4" />
             <FaTiktok
+              href="https://www.tiktok.com/@wallflower.beauty"
               size={24}
               className="cursor-pointer transition-all duration-300 hover:text-[#F35C97]"
             />

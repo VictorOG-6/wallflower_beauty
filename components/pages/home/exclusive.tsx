@@ -25,7 +25,7 @@ const Exclusive = () => {
             className="w-33 h-50 md:w-36 md:h-54 object-cover"
           />
           <Link
-            href="/shop"
+            href="/products/61b00750-0aff-4907-bbd9-12391acc5efa"
             className="w-48 h-10 bg-primary text-white text-base md:text-xl font-semibold flex items-center justify-center cursor-pointer transition-all duration-300 hover:bg-[#F35C97]"
           >
             ORDER NOW

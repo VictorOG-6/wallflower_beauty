@@ -119,12 +119,22 @@ const Footer = () => {
             <FaInstagram
               href="https://www.instagram.com/wallflowerr.beauty/"
               size={24}
+              className="cursor-pointer transition-all duration-300 hover:text-[#F35C97]"
             />
-            <FaFacebook href="#" size={24} />
-            <FaXTwitter href="#" size={24} />
+            <FaFacebook
+              href="#"
+              size={24}
+              className="cursor-pointer transition-all duration-300 hover:text-[#F35C97]"
+            />
+            <FaXTwitter
+              href="#"
+              size={24}
+              className="cursor-pointer transition-all duration-300 hover:text-[#F35C97]"
+            />
             <FaTiktok
               href="https://www.tiktok.com/@wallflower.beauty/"
               size={24}
+              className="cursor-pointer transition-all duration-300 hover:text-[#F35C97]"
             />
           </div>
         </div>
