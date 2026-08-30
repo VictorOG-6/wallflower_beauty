@@ -1,55 +1,57 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { UserRole } from "@/types";
+import { getAuthCookieOptions, resolveAuthSession } from "@/lib/server-auth";
 
 const ADMIN_ROLES = new Set<UserRole>(["admin", "staff"]);
 
-type AuthenticatedUser = {
-  role?: UserRole;
-};
+const redirectToSignIn = (request: NextRequest, clearCookies = false) => {
+  const response = NextResponse.redirect(new URL("/sign-in", request.url));
 
-const redirectToSignIn = (request: NextRequest) => {
-  return NextResponse.redirect(new URL("/sign-in", request.url));
+  if (clearCookies) {
+    response.cookies.delete("access_token");
+    response.cookies.delete("refresh_token");
+  }
+
+  return response;
 };
 
 export async function middleware(request: NextRequest) {
-  const accessToken = request.cookies.get("access_token")?.value;
+  const session = await resolveAuthSession({
+    access_token: request.cookies.get("access_token")?.value,
+    refresh_token: request.cookies.get("refresh_token")?.value,
+  });
 
-  if (!accessToken) {
-    return redirectToSignIn(request);
+  if (!session.user) {
+    const hasAuthCookie = Boolean(
+      request.cookies.get("access_token")?.value ||
+        request.cookies.get("refresh_token")?.value,
+    );
+
+    return redirectToSignIn(request, hasAuthCookie);
   }
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  if (!apiUrl) {
-    return redirectToSignIn(request);
+  if (!ADMIN_ROLES.has(session.user.role)) {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
-  try {
-    const response = await fetch(`${apiUrl}/user`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      cache: "no-store",
+  const response = NextResponse.next();
+
+  if (session.tokens) {
+    response.cookies.set({
+      name: "access_token",
+      value: session.tokens.access_token,
+      ...getAuthCookieOptions(session.tokens.access_token),
     });
-
-    if (!response.ok) {
-      const redirectResponse = redirectToSignIn(request);
-      redirectResponse.cookies.delete("access_token");
-      redirectResponse.cookies.delete("refresh_token");
-      return redirectResponse;
-    }
-
-    const user = (await response.json()) as AuthenticatedUser;
-
-    if (!user.role || !ADMIN_ROLES.has(user.role)) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
-
-    return NextResponse.next();
-  } catch {
-    return redirectToSignIn(request);
+    response.cookies.set({
+      name: "refresh_token",
+      value: session.tokens.refresh_token,
+      ...getAuthCookieOptions(session.tokens.refresh_token),
+    });
   }
+
+  return response;
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin", "/admin/:path*"],
 };
