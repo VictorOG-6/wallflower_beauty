@@ -1,34 +1,12 @@
 // app/api/auth/session/route.ts
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { jwtDecode } from "jwt-decode";
-import { getAuthCookieOptions } from "@/lib/server-auth";
 
 interface DecodedToken {
   exp: number;
   user_id: string;
   sub: string;
-}
-
-function setAuthCookies(
-  response: NextResponse,
-  accessToken: string,
-  refreshToken: string,
-) {
-  response.cookies.set({
-    name: "access_token",
-    value: accessToken,
-    ...getAuthCookieOptions(accessToken),
-  });
-  response.cookies.set({
-    name: "refresh_token",
-    value: refreshToken,
-    ...getAuthCookieOptions(refreshToken),
-  });
-}
-
-function clearAuthCookies(response: NextResponse) {
-  response.cookies.delete("access_token");
-  response.cookies.delete("refresh_token");
 }
 
 export async function POST(request: NextRequest) {
@@ -42,13 +20,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    jwtDecode<DecodedToken>(accessToken);
-    jwtDecode<DecodedToken>(refreshToken);
+    // Validate tokens
+    const accessDecoded = jwtDecode<DecodedToken>(accessToken);
+    const refreshDecoded = jwtDecode<DecodedToken>(refreshToken);
 
-    const response = NextResponse.json({ success: true });
-    setAuthCookies(response, accessToken, refreshToken);
+    const cookieStore = await cookies();
 
-    return response;
+    // Set access token cookie
+    cookieStore.set({
+      name: "access_token",
+      value: accessToken,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: accessDecoded.exp - Math.floor(Date.now() / 1000),
+      path: "/",
+    });
+
+    // Set refresh token cookie
+    cookieStore.set({
+      name: "refresh_token",
+      value: refreshToken,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: refreshDecoded.exp - Math.floor(Date.now() / 1000),
+      path: "/",
+    });
+
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Session creation error:", error);
     return NextResponse.json(
@@ -61,9 +61,11 @@ export async function POST(request: NextRequest) {
 // DELETE route for logout
 export async function DELETE() {
   try {
-    const response = NextResponse.json({ success: true });
-    clearAuthCookies(response);
-    return response;
+    const cookieStore = await cookies();
+    cookieStore.delete("access_token");
+    cookieStore.delete("refresh_token");
+
+    return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to delete session" },
