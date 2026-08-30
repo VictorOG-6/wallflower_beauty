@@ -23,16 +23,16 @@ const Footer = () => {
             <div className="flex flex-col items-center md:items-start text-center md:text-left gap-6">
               <h3 className="font-bold text-primary">EXPLORE</h3>
               <Link
-                href="/shop"
+                href="/shop?categories=Lip+Kits"
                 className="cursor-pointer transition-all duration-300 hover:text-primary"
               >
                 Shop Lip Kits
               </Link>
               <Link
-                href="/shop"
+                href="/shop?categories=Tops"
                 className="cursor-pointer transition-all duration-300 hover:text-primary"
               >
-                Shop Tanks
+                Shop Tops
               </Link>
               <Link
                 href="/shade-finder"
