@@ -253,10 +253,10 @@ const Navbar = () => {
                       </Link>
                       <span className="bg-black w-0.5 h-0.5 rounded-full" />
                       <Link
-                        href="/terms-and-condition"
+                        href="/terms-of-service"
                         className="cursor-pointer transition-all duration-300 hover:text-blue-700"
                       >
-                        Terms and Conditions
+                        Terms of Service
                       </Link>
                     </div>
                   </div>

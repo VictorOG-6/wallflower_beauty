@@ -3,13 +3,13 @@ import { PolicyHero } from "../privacy-policy/page";
 
 export const generateMetadata = async (): Promise<Metadata> => {
   return {
-    title: "Terms & Conditions – Wallflower Beauty",
+    title: "Terms of Service – Wallflower Beauty",
     description:
-      "Read the Terms and Conditions that govern your use of the Wallflower Beauty website.",
+      "Read the Terms of Service that govern your use of the Wallflower Beauty website.",
     openGraph: {
-      title: "Terms & Conditions – Wallflower Beauty",
+      title: "Terms of Service – Wallflower Beauty",
       description:
-        "Read the Terms and Conditions that govern your use of the Wallflower Beauty website.",
+        "Read the Terms of Service that govern your use of the Wallflower Beauty website.",
     },
   };
 };
@@ -21,7 +21,7 @@ export default async function TermsPage() {
       title: "Introduction",
       content: (
         <p>
-          This is the terms and conditions for the Wallflower Beauty website.{" "}
+          This is the terms of service for the Wallflower Beauty website.{" "}
           <a
             href="mailto:Wallflower Beauty@gmail.com"
             className="text-primary font-medium underline underline-offset-4 transition-opacity hover:opacity-60"
@@ -144,10 +144,10 @@ export default async function TermsPage() {
     <main>
       <section className="max-w-7xl mx-auto min-h-screen">
         <PolicyHero
-          label="Terms and Conditions"
-          title="Terms and Conditions"
+          label="Terms of Service"
+          title="Terms of Service"
           updated="Last updated: 27/04/2026"
-          description="This is the terms and conditions for the Wallflower Beauty website."
+          description="This is the terms of service for the Wallflower Beauty website."
         />
         <div className="fluid-width max-w-8xl mx-auto px-4 pb-24 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-12 pt-12 lg:grid-cols-[220px_1fr] lg:gap-16 lg:pt-16">
